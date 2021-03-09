@@ -133,14 +133,26 @@ def _in(ctx):
             for frame in raw_data:
                 if frame is not None:
                     data = frame.reshape(-1)
-                    print(data)
+                    #print(data)
                     _logger.debug("streaming frame")
                     stream_context.feedAudioContent(np.frombuffer(data, np.int16))
                 else:
                     _logger.debug("end utterence")
 
                     text = stream_context.finishStream()
-                    _logger.info("Heard: {}".format(text))
+
+                    if text is not None:
+                        if (text is None) or (text.strip() == ''):
+                            continue
+                        _logger.info("Heard: {}".format(text))
+                        yield text
+                        #if text.upper() in dinf.phrases:
+                        #    yield text
+                        #else:
+                        #    continue
+                    else:
+                        _logger.warn('Speech not recognized')
+
 
         except Exception as e:
             _logger.error(e)
