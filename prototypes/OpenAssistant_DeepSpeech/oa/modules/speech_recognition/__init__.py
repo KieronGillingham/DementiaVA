@@ -63,45 +63,10 @@ def get_decoder():
     # XXX: race condition when mind isn't set yet
     mind = oa.legacy.mind
     if not hasattr(_decoders, mind.name):
-
         print('Initializing model...')
         model = deepspeech.Model("/home/mycroft/deepspeech-0.9.3-models.pbmm")
         model.enableExternalScorer("/home/mycroft/deepspeech-0.9.3-models.scorer")
         return model
-
-        """
-        # Start audio with VAD
-        vad_audio = VADAudio(aggressiveness=3,
-                             device=None,
-                             input_rate=16000)
-        print("Listening (ctrl-C to exit)...")
-        frames = vad_audio.vad_collector()
-
-        # Stream from microphone to DeepSpeech using VAD
-        stream_context = model.createStream()
-        """
-
-        """  
-        # Configure Speech to text dictionaries.
-        ret = config_stt(mind.cache_dir, mind.kws.keys(), stat_mtime(mind.module))
-              
-        # Process audio chunk by chunk. On a keyphrase detected perform the action and restart search.
-        config = pocketsphinx.Decoder.default_config()
-
-        # Set paths for the language model files.
-        config.set_string('-hmm', ret.hmm_dir)
-        config.set_string("-lm", ret.lang_file)
-        config.set_string("-dict", ret.dic_file)
-        config.set_string("-logfn", os.devnull)  # Disable logging.
-        
-
-        ret.decoder = pocketsphinx.Decoder(config)
-        _decoders[mind.name] = ret
-    else:
-        return _decoders[mind.name]
-
-    return ret
-    """
 
 def _in(ctx):
     mute = 0
@@ -124,8 +89,6 @@ def _in(ctx):
         if mute:
             continue
 
-
-
         # Obtain audio data.
         try:
             model = get_decoder()
@@ -133,7 +96,6 @@ def _in(ctx):
             for frame in raw_data:
                 if frame is not None:
                     data = frame.reshape(-1)
-                    #print(data)
                     _logger.debug("streaming frame")
                     stream_context.feedAudioContent(np.frombuffer(data, np.int16))
                 else:
@@ -146,57 +108,9 @@ def _in(ctx):
                             continue
                         _logger.info("Heard: {}".format(text))
                         yield text
-                        #if text.upper() in dinf.phrases:
-                        #    yield text
-                        #else:
-                        #    continue
                     else:
                         _logger.warn('Speech not recognized')
 
 
         except Exception as e:
             _logger.error(e)
-
-        """else:
-            if text is not None:
-                if text.strip() == '':
-                    continue
-                _logger.info("Heard: {}".format(text))
-                if text.upper() in dinf.phrases:
-                    yield text
-                else:
-                    continue
-
-            else:
-                _logger.warn('Speech not recognized')"""
-
-"""
-# Obtain audio data.
-        try:
-            dinf = get_decoder()
-            decoder = dinf.decoder
-            decoder.start_utt()  # Begin utterance processing.
-
-            # Process audio data with recognition enabled (no_search = False), as a full utterance (full_utt = True)
-            decoder.process_raw(raw_data, False, False)  
-
-            decoder.end_utt()  # Stop utterance processing.
-
-        except Exception as e:
-            _logger.error(e)
-
-        else:
-            hypothesis = decoder.hyp()
-            if hypothesis is not None: 
-                hyp = hypothesis.hypstr
-                if (hyp is None) or (hyp.strip() == ''):
-                    continue
-                _logger.info("Heard: {}".format(hyp))
-                if hyp.upper() in dinf.phrases:
-                    yield hyp
-                else:
-                    continue
-
-            else:
-                _logger.warn('Speech not recognized')
-"""
