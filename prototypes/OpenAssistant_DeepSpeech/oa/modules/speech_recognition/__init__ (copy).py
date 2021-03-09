@@ -4,21 +4,14 @@ import logging
 _logger = logging.getLogger(__name__)
 
 import os, re, time
+import logging
 
 import pocketsphinx
 import requests
 
 import oa.legacy
 
-from datetime import datetime
-import threading, collections, queue, os, os.path
 import deepspeech
-import numpy as np
-import pyaudio
-import wave
-import webrtcvad
-from halo import Halo
-from scipy import signal
 
 from oa.modules.abilities.core import get, empty, info
 from oa.modules.abilities.system import download_file, write_file, stat_mtime
@@ -57,34 +50,57 @@ def config_stt(cache_dir, keywords, kws_last_modification_time_in_sec = None):
     data = '\n'.join(_.phrases)
     write_file(_.strings_file, data)
 
+    # Download language model data from `speech.cs.cmu.edu`.
+    update_language(_) 
     return _
+
+def update_language(_):
+    # Update the language model using the online `lmtool`.
+    host = 'http://www.speech.cs.cmu.edu'
+    url = host + '/cgi-bin/tools/lmtool/run'
+
+    # Submit the corpus to the `lmtool`.
+    response_text = ""
+    with open(_.strings_file, 'r') as f:
+        files = {'corpus': f}
+        values = {'formtype': 'simple'}
+
+        r = requests.post(url, files = files, data = values)
+        response_text = r.text
+
+    # Parse response to get urls of the files we need.
+    path_re = r'.*<title>Index of (.*?)</title>.*'
+    number_re = r'.*TAR([0-9]*?)\.tgz.*'
+    path = None
+    for line in response_text.split('\n'):
+        # Error response.
+        if "[_ERRO_]" in line:
+            return 1
+        # If we find the directory, keep it and don't break.
+        if re.search(path_re, line):
+            path = host + re.sub(path_re, r'\1', line)
+        # If we find a number, keep it and break.
+        elif re.search(number_re, line):
+            number = re.sub(number_re, r'\1', line)
+            break
+
+    if path is None:
+        info('_.cache_dir',_.cache_dir)
+        raise Exception('Not found: update_language: ' + response_text)
+    lm_url = path + '/' + number + '.lm'
+    dic_url = path + '/' + number + '.dic'
+
+    if _.lang_file is not None:
+        download_file(lm_url, _.lang_file)
+    download_file(dic_url, _.dic_file) 
 
 def get_decoder():
     # XXX: race condition when mind isn't set yet
     mind = oa.legacy.mind
     if not hasattr(_decoders, mind.name):
-
-        print('Initializing model...')
-        model = deepspeech.Model("/home/mycroft/deepspeech-0.9.3-models.pbmm")
-        model.enableExternalScorer("/home/mycroft/deepspeech-0.9.3-models.scorer")
-        return model
-
-        """
-        # Start audio with VAD
-        vad_audio = VADAudio(aggressiveness=3,
-                             device=None,
-                             input_rate=16000)
-        print("Listening (ctrl-C to exit)...")
-        frames = vad_audio.vad_collector()
-
-        # Stream from microphone to DeepSpeech using VAD
-        stream_context = model.createStream()
-        """
-
-        """  
         # Configure Speech to text dictionaries.
         ret = config_stt(mind.cache_dir, mind.kws.keys(), stat_mtime(mind.module))
-              
+        
         # Process audio chunk by chunk. On a keyphrase detected perform the action and restart search.
         config = pocketsphinx.Decoder.default_config()
 
@@ -93,7 +109,6 @@ def get_decoder():
         config.set_string("-lm", ret.lang_file)
         config.set_string("-dict", ret.dic_file)
         config.set_string("-logfn", os.devnull)  # Disable logging.
-        
 
         ret.decoder = pocketsphinx.Decoder(config)
         _decoders[mind.name] = ret
@@ -101,14 +116,11 @@ def get_decoder():
         return _decoders[mind.name]
 
     return ret
-    """
 
 def _in(ctx):
     mute = 0
-
     while not ctx.finished.is_set():
         raw_data = get()
-        raw_data.append(None)
         if isinstance(raw_data, str):
             if raw_data == 'mute':
                 _logger.debug('Muted')
@@ -123,43 +135,8 @@ def _in(ctx):
         # Mute mode. Do not listen until unmute.
         if mute:
             continue
-
-
-
+        
         # Obtain audio data.
-        try:
-            model = get_decoder()
-            stream_context = model.createStream()
-            for frame in raw_data:
-                if frame is not None:
-                    data = frame.reshape(-1)
-                    print(data)
-                    _logger.debug("streaming frame")
-                    stream_context.feedAudioContent(np.frombuffer(data, np.int16))
-                else:
-                    _logger.debug("end utterence")
-
-                    text = stream_context.finishStream()
-                    _logger.info("Heard: {}".format(text))
-
-        except Exception as e:
-            _logger.error(e)
-
-        """else:
-            if text is not None:
-                if text.strip() == '':
-                    continue
-                _logger.info("Heard: {}".format(text))
-                if text.upper() in dinf.phrases:
-                    yield text
-                else:
-                    continue
-
-            else:
-                _logger.warn('Speech not recognized')"""
-
-"""
-# Obtain audio data.
         try:
             dinf = get_decoder()
             decoder = dinf.decoder
@@ -187,4 +164,4 @@ def _in(ctx):
 
             else:
                 _logger.warn('Speech not recognized')
-"""
+
