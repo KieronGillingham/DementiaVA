@@ -1,31 +1,22 @@
-# stt.py - Speech to text.
-
+# Logging
 import logging
-_logger = logging.getLogger(__name__)
 
-import os, re, time
-
-import pocketsphinx
-import requests
-
+# OS interaction
+import os
+import time
 import oa.legacy
-
-from datetime import datetime
-import threading, collections, queue, os, os.path
+import os.path
 import deepspeech
 import numpy as np
-import pyaudio
-import wave
-import webrtcvad
-from halo import Halo
-from scipy import signal
 
 from oa.modules.abilities.core import get, empty, info
 from oa.modules.abilities.system import download_file, write_file, stat_mtime
 
 _decoders = {}
+_logger = logging.getLogger(__name__)
 
-def config_stt(cache_dir, keywords, kws_last_modification_time_in_sec = None):
+
+def config_stt(cache_dir, keywords, kws_last_modification_time_in_sec=None):
     _ = oa.legacy.Core()
     cache_path = lambda x: os.path.join(cache_dir, x)
     _.lang_file = cache_path('lm')
