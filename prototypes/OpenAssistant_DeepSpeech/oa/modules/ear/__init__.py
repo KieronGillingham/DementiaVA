@@ -1,12 +1,9 @@
-# ear.py - Speech recognition input.
-
+# Audio input
 import collections
 import math
-
 import audioop
 import numpy
 import sounddevice
-
 
 DEFAULT_CONFIG = {
     # The `timeout` parameter is the maximum number of seconds that a phrase continues before stopping and returning a result. If the `timeout` is None there will be no phrase time limit.
@@ -24,20 +21,20 @@ DEFAULT_CONFIG = {
     "chunk": 1024,
 
     # Minimum audio energy to consider for recording.
-    "energy_threshold": 300,
+    "energy_threshold": 150,
 
     "dynamic_energy_threshold": False,
     "dynamic_energy_adjustment_damping": 0.15,
     "dynamic_energy_ratio": 1.5,
 
     # Seconds of non-speaking audio before a phrase is considered complete.
-    "pause_threshold": 0.8,
+    "pause_threshold": 2,
 
     # Minimum seconds of speaking audio before we consider the audio a phrase - values below this are ignored (for filtering out clicks and pops).
-    "phrase_threshold": 0.3,
+    "phrase_threshold": 0.1,
 
     # Seconds of non-speaking audio to keep on both sides of the recording.
-    "non_speaking_duration": 0.8,
+    "non_speaking_duration": 2,
 }
 
 def _in(ctx):
@@ -85,6 +82,7 @@ def _in(ctx):
                 # Read audio input until the phrase ends.
                 pause_count, phrase_count = 0, 0
                 phrase_start_time = elapsed_time
+                print("start recording")
                 while not ctx.finished.is_set():
                     # Handle phrase being too long by cutting off the audio.
                     elapsed_time += seconds_per_buffer
@@ -92,6 +90,7 @@ def _in(ctx):
                         break
 
                     buf = stream.read(_config.get("chunk"))[0]
+                    #_logger.debug("appending buffer {}".format(buf))
                     frames.append(buf)
                     phrase_count += 1
 
@@ -110,6 +109,5 @@ def _in(ctx):
 
             # Obtain frame data.
             for _ in range(pause_count - non_speaking_buffer_count): frames.pop()  # Remove extra non-speaking frames at the end.
-            frame_data = numpy.concatenate(frames)
-            #yield frame_data
+            print("recorded {} seconds of audio".format(elapsed_time/seconds_per_buffer))
             yield frames
