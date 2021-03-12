@@ -19,10 +19,18 @@ def get_decoder():
     # XXX: race condition when mind isn't set yet
     mind = oa.legacy.mind
     if not hasattr(_decoders, mind.name):
-        print('Initializing model...')
-        model = deepspeech.Model("/home/mycroft/deepspeech-0.9.3-models.pbmm")
-        model.enableExternalScorer("/home/mycroft/deepspeech-0.9.3-models.scorer")
-        return model
+        _logger.info('Initializing speech recognition model')
+        try:
+            # TODO: Make configurable
+            model = deepspeech.Model("/home/mycroft/deepspeech-0.9.3-models.pbmm")
+            model.enableExternalScorer("/home/mycroft/deepspeech-0.9.3-models.scorer")
+            if model is not None:
+                _logger.info('Speech recognition model loaded')
+                return model
+        except Exception as e:
+            _logger.info('Speech recognition model failed to load')
+            _logger.error(e)
+            return None
 
 def _in(ctx):
     mute = 0
