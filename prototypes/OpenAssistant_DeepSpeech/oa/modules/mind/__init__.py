@@ -23,6 +23,8 @@ def load_mind(path):
     mind.name = os.path.splitext(os.path.basename(mind.module))[0]
     mind.cache_dir = os.path.join(oa.legacy.core_directory, 'cache', mind.name)
 
+    _logger.debug("Loading {} mind".format(mind.name))
+
     # Make directories.
     if not os.path.exists(mind.cache_dir):
         os.makedirs(mind.cache_dir)
@@ -31,6 +33,7 @@ def load_mind(path):
     mind.__dict__.update(M.__dict__)
     
     # Add command keywords without spaces.
+    _logger.debug("Keywords:{}".format(M.kws.items()))
     mind.kws = {}
     for key, value in M.kws.items():
         for synonym in key.strip().split(','):
@@ -65,12 +68,10 @@ def load_minds():
 
 def _in(ctx):
 
-    default_mind = 'boot'
+    default_mind = 'dem'
     load_minds()
     set_mind(default_mind)
-
-    _logger.debug('"{}" is now listening. Say "Boot Mind!" to see if it can hear you.'.format(default_mind))
-
+    _logger.info('"{}" is now listening.'.format(default_mind))
 
     while not ctx.finished.is_set():
         text = get()
@@ -80,9 +81,11 @@ def _in(ctx):
             # Nothing to do.
             continue
         t = text.upper()
+        _logger.debug('Text: {}'.format(t))
 
         # Check for a matching command.
         fn = mind.kws.get(t, None)
+        _logger.debug('Function: {}'.format(fn))
 
         if fn is not None:
             # There are two types of commands, stubs and command line text.

@@ -8,8 +8,8 @@ kws = {}
 
 command = command_registry(kws)
 
-@command("dem mind")
-def hello_world():
+@command("run demo")
+def run_demo():
     say('- Hello Kieron!')
 """
 def close_assistant():

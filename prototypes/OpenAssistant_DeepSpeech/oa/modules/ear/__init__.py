@@ -4,6 +4,9 @@ import math
 import audioop
 import numpy
 import sounddevice
+import logging
+
+_logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG = {
     # The `timeout` parameter is the maximum number of seconds that a phrase continues before stopping and returning a result. If the `timeout` is None there will be no phrase time limit.
@@ -82,7 +85,7 @@ def _in(ctx):
                 # Read audio input until the phrase ends.
                 pause_count, phrase_count = 0, 0
                 phrase_start_time = elapsed_time
-                print("start recording")
+                _logger.debug("Audio detected")
                 while not ctx.finished.is_set():
                     # Handle phrase being too long by cutting off the audio.
                     elapsed_time += seconds_per_buffer
@@ -109,5 +112,5 @@ def _in(ctx):
 
             # Obtain frame data.
             for _ in range(pause_count - non_speaking_buffer_count): frames.pop()  # Remove extra non-speaking frames at the end.
-            print("recorded {} seconds of audio".format(elapsed_time/seconds_per_buffer))
+            _logger.debug("Recorded {} seconds of audio".format(elapsed_time))
             yield frames

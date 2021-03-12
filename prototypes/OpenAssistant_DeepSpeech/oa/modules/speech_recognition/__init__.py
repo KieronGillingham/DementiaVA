@@ -87,7 +87,6 @@ def _in(ctx):
             for frame in raw_data:
                 if frame is not None:
                     data = frame.reshape(-1)
-                    _logger.debug("streaming frame")
                     stream_context.feedAudioContent(np.frombuffer(data, np.int16))
                 else:
                     _logger.debug("end utterence")
