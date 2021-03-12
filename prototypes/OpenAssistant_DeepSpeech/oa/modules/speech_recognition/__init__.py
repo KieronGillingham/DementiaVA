@@ -12,28 +12,28 @@ import numpy as np
 from oa.modules.abilities.core import get, empty, info
 from oa.modules.abilities.system import download_file, write_file, stat_mtime
 
-_decoders = {}
 _logger = logging.getLogger(__name__)
 
-def get_decoder():
-    # XXX: race condition when mind isn't set yet
-    mind = oa.legacy.mind
-    if not hasattr(_decoders, mind.name):
-        _logger.info('Initializing speech recognition model')
-        try:
-            # TODO: Make configurable
-            model = deepspeech.Model("/home/mycroft/deepspeech-0.9.3-models.pbmm")
-            model.enableExternalScorer("/home/mycroft/deepspeech-0.9.3-models.scorer")
-            if model is not None:
-                _logger.info('Speech recognition model loaded')
-                return model
-        except Exception as e:
-            _logger.info('Speech recognition model failed to load')
-            _logger.error(e)
-            return None
+
+def get_model():
+    _logger.info('Initializing speech recognition model')
+    try:
+        # TODO: Make configurable
+        model = deepspeech.Model("/home/mycroft/deepspeech-0.9.3-models.pbmm")
+        model.enableExternalScorer("/home/mycroft/deepspeech-0.9.3-models.scorer")
+        if model is not None:
+            _logger.info('Speech recognition model loaded')
+    except Exception as ex:
+        _logger.error('Speech recognition model failed to load - {}'.format(ex))
+        model = None
+    return model
+
 
 def _in(ctx):
     mute = 0
+    model = get_model()
+    if model is None:
+        return None
 
     while not ctx.finished.is_set():
         raw_data = get()
@@ -55,7 +55,6 @@ def _in(ctx):
 
         # Obtain audio data.
         try:
-            model = get_decoder()
             stream_context = model.createStream()
             for frame in raw_data:
                 if frame is not None:
@@ -77,3 +76,5 @@ def _in(ctx):
 
         except Exception as e:
             _logger.error(e)
+
+
