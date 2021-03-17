@@ -54,6 +54,7 @@ def _in(ctx):
     with stream:
         while not ctx.finished.is_set():
             elapsed_time = 0  # Number of seconds of audio read
+
             buf = b""  # An empty buffer means that the stream has ended and there is no data left to read.
             while not ctx.finished.is_set():
                 frames = collections.deque()
@@ -112,5 +113,5 @@ def _in(ctx):
 
             # Obtain frame data.
             for _ in range(pause_count - non_speaking_buffer_count): frames.pop()  # Remove extra non-speaking frames at the end.
-            _logger.debug("Recorded {} seconds of audio".format(elapsed_time))
+            _logger.debug("Recorded {} seconds of audio".format(elapsed_time-phrase_start_time))
             yield frames

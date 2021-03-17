@@ -10,7 +10,7 @@ kws = {}
 
 command = command_registry(kws)
 
-@command(["demo", "intro", "hello"])
+@command(["demo", "intro", "hello", "start"])
 def run_demo():
     say('- Hello! How can I help?')
 

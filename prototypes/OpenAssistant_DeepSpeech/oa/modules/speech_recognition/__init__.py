@@ -37,7 +37,6 @@ def _in(ctx):
 
     while not ctx.finished.is_set():
         raw_data = get()
-        raw_data.append(None)
         if isinstance(raw_data, str):
             if raw_data == 'mute':
                 _logger.debug('Muted')
@@ -47,8 +46,14 @@ def _in(ctx):
                 mute = 0
                 time.sleep(.9)
                 empty()
+            else:
+                _logger.error("Unknown string received: '{}'".format(raw_data))
             continue
-            
+        else:
+            try:
+                raw_data.append(None) ## Append empty frame to deque to indicate end of audio
+            except Exception as ex:
+                _logger.error("Audio data in invalid format - {}".format(ex))
         # Mute mode. Do not listen until unmute.
         if mute:
             continue

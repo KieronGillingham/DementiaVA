@@ -33,7 +33,6 @@ def load_mind(path):
     mind.__dict__.update(M.__dict__)
     
     # Add command keywords without spaces.
-    _logger.debug("Keywords:{}".format(M.kws.items()))
     mind.kws = {}
     for key, value in M.kws.items():
         for synonym in key.strip().split(','):
@@ -81,9 +80,9 @@ def _in(ctx):
             # Nothing to do.
             continue
         t = text.upper()
-        _logger.debug('Text: {}'.format(t))
 
         # Check for a matching command.
+        # TODO: Implement more robust intent detection
         fn = mind.kws.get(t, None)
         _logger.debug('Function: {}'.format(fn))
 
@@ -94,11 +93,15 @@ def _in(ctx):
                 call_function(fn)
                 oa.legacy.oa.last_command = t
             # For strings, call `sys_exec()`.
+            # TODO: Remove command line functions
             elif isinstance(fn, str):
                 sys_exec(fn)
                 oa.legacy.oa.last_command = t
             else:
                 # Any unknown command raises an exception.
                 raise Exception("Unable to process: {}".format(text))
+        else:
+            # Input not registered as command.
+            _logger.debug("'{}' is not a command".format(text))
         yield text
 
