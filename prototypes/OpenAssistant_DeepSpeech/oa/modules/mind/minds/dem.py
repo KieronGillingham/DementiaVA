@@ -4,18 +4,20 @@ from oa.modules.abilities.interact import say, play, mind
 from oa.modules.abilities.other import read_news_feed, diagnostics, read_forecast
 from oa.modules.abilities.other import say_day, say_last_command, say_time
 
+import oa.legacy
+
 kws = {}
 
 command = command_registry(kws)
 
-@command("dem mind")
-def hello_world():
-    say('- Hello Kieron!')
-"""
-def close_assistant():
-    play('beep_close.wav')
-    mind('boot')
+@command(["demo", "intro", "hello", "start"])
+def run_demo():
+    say('- Hello! How can I help?')
 
+@command(["close", "stop", "end"])
+def close_assistant():
+    oa.legacy.hub.finished.set()
+"""
 @command(["list commands", "what can i say"])
 def list_commands():
     say('- The currently available voice commands are:\n{}'.format(',\n'.join(kws.keys())))
