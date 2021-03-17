@@ -15,7 +15,7 @@ def response_sound():
 @command("open assistant")
 def open_root():
   play('beep_open.wav')
-  mind('root')
+  mind('dem')
 
 @command(["list commands", "help"])
 def list_commands():
