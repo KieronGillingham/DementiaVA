@@ -55,8 +55,8 @@ def get_decoder():
     mind = oa.legacy.mind
     if not hasattr(_decoders, mind.name):
         print('Initializing model...')
-        model = deepspeech.Model("/home/mycroft/deepspeech-0.9.3-models.pbmm")
-        model.enableExternalScorer("/home/mycroft/deepspeech-0.9.3-models.scorer")
+        model = deepspeech.Model("/home/vbox/DementiaVA/dementiaVA/deepspeech-0.9.3-models.pbmm")
+        model.enableExternalScorer("/home/vbox/DementiaVA/dementiaVA/deepspeech-0.9.3-models.scorer")
         return model
 
 def _in(ctx):
