@@ -18,8 +18,8 @@ def get_model():
     _logger.info('Initializing speech recognition model')
     try:
         # TODO: Make configurable
-        model = deepspeech.Model("/home/mycroft/deepspeech-0.9.3-models.pbmm")
-        model.enableExternalScorer("/home/mycroft/deepspeech-0.9.3-models.scorer")
+        model = deepspeech.Model("/home/vbox/DementiaVA/dementiaVA/deepspeech-0.9.3-models.pbmm")
+        model.enableExternalScorer("/home/vbox/DementiaVA/dementiaVA/deepspeech-0.9.3-models.scorer")
         if model is not None:
             _logger.info('Speech recognition model loaded')
     except Exception as ex:
