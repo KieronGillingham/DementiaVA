@@ -1,10 +1,7 @@
-feedparser
-keyboard
 numpy
 playsound
 deepspeech
 psutil
-python-forecastio
 pyttsx3
 requests
 sounddevice

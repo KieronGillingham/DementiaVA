@@ -1,5 +1,3 @@
-import keyboard
-
 import oa.legacy
 
 from oa.modules.abilities.core import call_function, put
@@ -33,11 +31,7 @@ def say(text):
     put('voice', text)
 
 def keys(s):
-    """ Hook and simulate keyboard events. """
-    if '+' in s:
-        keyboard.press_and_release(s)
-    else:
-        keyboard.write(s)
+    return None
 
 def play(fname):
     """ Play a sound file. """

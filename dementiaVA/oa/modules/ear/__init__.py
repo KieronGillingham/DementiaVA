@@ -2,7 +2,6 @@
 import collections
 import math
 import audioop
-import numpy
 import sounddevice
 import logging
 
