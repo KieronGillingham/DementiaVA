@@ -14,22 +14,24 @@ from oa.modules.abilities.system import download_file, write_file, stat_mtime
 
 _logger = logging.getLogger(__name__)
 
-def get_model():
+def get_model(ctx):
     _logger.info('Initializing speech recognition model')
     try:
-        # TODO: Make configurable
-        model = deepspeech.Model("/home/vbox/DementiaVA/dementiaVA/deepspeech-0.9.3-models.pbmm")
-        model.enableExternalScorer("/home/vbox/DementiaVA/dementiaVA/deepspeech-0.9.3-models.scorer")
+        config = ctx.config
+        model_path = config["deepspeech_model"]
+        scorer_path = config["deepspeech_scorer"]
+        model = deepspeech.Model(model_path)
+        model.enableExternalScorer(scorer_path)
         if model is not None:
             _logger.info('Speech recognition model loaded')
     except Exception as ex:
-        _logger.error('Speech recognition model failed to load - {}'.format(ex))
+        _logger.error('Speech recognition model/scorerz failed to load - {}'.format(ex))
         model = None
     return model
 
 def _in(ctx):
     mute = 0
-    model = get_model()
+    model = get_model(ctx)
     if model is None:
         return None
 
