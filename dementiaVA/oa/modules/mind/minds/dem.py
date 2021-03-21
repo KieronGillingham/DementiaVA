@@ -10,13 +10,22 @@ kws = {}
 
 command = command_registry(kws)
 
+
 @command(["demo", "intro", "hello", "start"])
 def run_demo():
     say('- Hello! How can I help?')
 
+
 @command(["close", "stop", "end"])
 def close_assistant():
     oa.legacy.hub.finished.set()
+
+
+@command(["number"])
+def number_game():
+    mind("numbergame")
+
+
 """
 @command(["list commands", "what can i say"])
 def list_commands():
