@@ -46,7 +46,13 @@ def set_mind(name, history=True):
     if history:
         _history.append(name)
         
-    oa.legacy.mind = oa.legacy.minds[name]
+    try:
+        oa.legacy.mind = oa.legacy.minds[name]
+        if oa.legacy.mind.start:
+            _logger.debug('Running start function for {}'.format(name))
+            oa.legacy.mind.start()
+    except:
+        _logger.error('Mind could not be loaded')
     return oa.legacy.mind
 
 def switch_back():
