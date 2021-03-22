@@ -13,10 +13,7 @@ command = command_registry(kws)
 def start():
     say('Let\'s Begin')
 
-@command(["demo", "intro", "hello", "start"])
-def run_demo():
-    say('- Hello! How can I help?')
-
 @command(["close", "stop", "end"])
 def stop_game():
+    say('Let\'s stop playing.')
     mind("dem")
