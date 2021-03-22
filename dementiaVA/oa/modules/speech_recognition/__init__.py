@@ -25,7 +25,7 @@ def get_model(ctx):
         if model is not None:
             _logger.info('Speech recognition model loaded')
     except Exception as ex:
-        _logger.error('Speech recognition model/scorerz failed to load - {}'.format(ex))
+        _logger.error('Speech recognition model/scorer failed to load - {}'.format(ex))
         model = None
     return model
 
