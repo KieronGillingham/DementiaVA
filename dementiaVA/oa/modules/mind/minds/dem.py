@@ -1,14 +1,20 @@
 from oa.core.util import command_registry
 
-from oa.modules.abilities.interact import say, play, mind
+from oa.modules.abilities.interact import say, play, mind, confirm, yes_no, user_answer
 from oa.modules.abilities.other import read_news_feed, diagnostics, read_forecast
 from oa.modules.abilities.other import say_day, say_last_command, say_time
-
-import oa.legacy
 
 kws = {}
 
 command = command_registry(kws)
+
+def start():
+    say('- Hello, I am GLAD. How can I help?')
+
+
+@command(["what can you do"])
+def what_do():
+    say('At the moment, I can\'t do very much I\'m afraid.')
 
 
 @command(["demo", "intro", "hello", "start"])
@@ -20,10 +26,20 @@ def run_demo():
 def close_assistant():
     oa.legacy.hub.finished.set()
 
+def numbergame_yes():
+    say('Okay let\'s play.')
+    mind('numbergame')
 
-@command(["number"])
+def numbergame_no():
+    say('Okay, we won\'t play.')
+
+@command(["number game"])
 def number_game():
-    mind("numbergame")
+    #yes_no("Do you want to play the number game?", 'dem', {yes})
+    #if confirm("Do you want to play the number game?", "Okay, let's play.", "Okay, we will not play the number game."):
+    #    mind("numbergame")
+    say('Do you want to play?')
+    user_answer('unused', {'yes': numbergame_yes, 'no': numbergame_no})
 
 
 """

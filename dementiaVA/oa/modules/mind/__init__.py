@@ -45,14 +45,14 @@ def set_mind(name, history=True):
     _logger.info('Opening Mind: {}'.format(name))
     if history:
         _history.append(name)
-        
+
     try:
         oa.legacy.mind = oa.legacy.minds[name]
         if oa.legacy.mind.start:
-            _logger.debug('Running start function for {}'.format(name))
+            _logger.debug(f'Running start function for {name}')
             oa.legacy.mind.start()
-    except:
-        _logger.error('Mind could not be loaded')
+    except Exception as ex:
+        _logger.error(f'{name} mind could not be set: {ex}')
     return oa.legacy.mind
 
 def switch_back():
@@ -90,7 +90,6 @@ def _in(ctx):
         # Check for a matching command.
         # TODO: Implement more robust intent detection
         fn = mind.kws.get(t, None)
-        _logger.debug('Function: {}'.format(fn))
 
         if fn is not None:
             # There are two types of commands, stubs and command line text.
@@ -106,6 +105,9 @@ def _in(ctx):
             else:
                 # Any unknown command raises an exception.
                 raise Exception("Unable to process: {}".format(text))
+        elif t is not None:
+            # If function is not none, than pass the text to interact
+            oa.modules.abilities.interact.answer(text)
         else:
             # Input not registered as command.
             _logger.debug("'{}' is not a command".format(text))
