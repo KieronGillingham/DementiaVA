@@ -14,7 +14,7 @@ def start():
 
 @command(["what can you do"])
 def what_do():
-    say('At the moment, I can\'t do very much I\'m afraid.')
+    say('At the moment, I can\'t do very much. But I can play a simple number game with you.')
 
 
 @command(["demo", "intro", "hello", "start"])
@@ -35,11 +35,7 @@ def numbergame_no():
 
 @command(["number game"])
 def number_game():
-    #yes_no("Do you want to play the number game?", 'dem', {yes})
-    #if confirm("Do you want to play the number game?", "Okay, let's play.", "Okay, we will not play the number game."):
-    #    mind("numbergame")
-    say('Do you want to play?')
-    user_answer({'yes': numbergame_yes, 'no': numbergame_no})
+    yes_no('Do you want to play?', numbergame_yes, numbergame_no)
 
 
 """
