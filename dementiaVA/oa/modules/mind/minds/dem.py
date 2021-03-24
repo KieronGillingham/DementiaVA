@@ -1,6 +1,6 @@
 from oa.core.util import command_registry
 
-from oa.modules.abilities.interact import say, play, mind, confirm, yes_no, user_answer
+from oa.modules.abilities.interact import say, play, mind, yes_no, user_answer
 from oa.modules.abilities.other import read_news_feed, diagnostics, read_forecast
 from oa.modules.abilities.other import say_day, say_last_command, say_time
 
@@ -39,7 +39,7 @@ def number_game():
     #if confirm("Do you want to play the number game?", "Okay, let's play.", "Okay, we will not play the number game."):
     #    mind("numbergame")
     say('Do you want to play?')
-    user_answer('unused', {'yes': numbergame_yes, 'no': numbergame_no})
+    user_answer({'yes': numbergame_yes, 'no': numbergame_no})
 
 
 """
