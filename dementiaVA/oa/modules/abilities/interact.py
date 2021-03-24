@@ -1,30 +1,39 @@
-from os import wait
-from time import sleep
-
 import oa.legacy
 
 from oa.modules.abilities.core import call_function, put
 from oa.modules.abilities.system import find_file
 
+import logging
+_logger = logging.getLogger(__name__)
 
 def user_answer(choices):
-    """ Within any `mind` we will receive a one word answer command (voice, file path, etc, any) from the user. """
+    """ Set the possible user choices as a dict:
+    {'SPOKEN PHRASE': function_to_call, ...}
+    """
     #mind(mind_for_answer, 0) # No history.
     oa.legacy.mind.user_choices = choices
-    print(f"Setting choices: {choices}")
-
+    _logger.debug(f"Setting choices: {choices}")
 
 def answer(text):
-    """ Save the return function parameter and switch to previous mind. """
+    """ Process an unknown user response and compare it to the current choices in the mind. """
+    # If no choice is active, do nothing.
+    if not oa.legacy.mind.user_choices:
+        return
+
     text = text.lower()
-    print(f'Received: {text}')
+    _logger.debug(f'Received: {text}')
+    # Get a function from the user_choices dict set by user_answer
     func = oa.legacy.mind.user_choices.get(text, None)
+
+    # If a function is found, clear the choices dict and run the function
     if func:
         oa.legacy.mind.user_choices = None
-        print("Clearing choices")
+        _logger.debug("Clearing choices")
         call_function(func)
     else:
+        # If a function isn't found, alert the user.
         say('sorry, I didn\'t get that')
+
     #oa.legacy.mind.switch_back()
 
 

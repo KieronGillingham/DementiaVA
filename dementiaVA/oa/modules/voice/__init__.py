@@ -24,7 +24,8 @@ def _in(ctx):
 
     while not ctx.finished.is_set():
         s = get()
-        _logger.debug("Saying: %s", s)
+        _logger.debug('Speaking:')
+        print(f'\n{s}\n')
 
         # Pause Ear (listening) while talking. Mute TTS.
         # TODO: move this somewhere else
