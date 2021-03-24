@@ -72,8 +72,6 @@ if __name__ == '__main__':
         except Exception as ex:
             _logger.info("Default configuration file not found: {}".format(ex))
 
-    print(config)
-
     hub = oa.Hub(config=config)
 
     # XXX: temporary compatability hack
