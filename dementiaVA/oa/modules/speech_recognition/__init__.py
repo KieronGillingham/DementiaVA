@@ -76,7 +76,7 @@ def _in(ctx):
                         _logger.info("Heard: {}".format(text))
                         yield text
                     else:
-                        _logger.warn('Speech not recognized')
+                        _logger.warning('Speech not recognized')
 
 
         except Exception as e:
