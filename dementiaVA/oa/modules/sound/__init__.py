@@ -12,7 +12,7 @@ def _in(ctx):
         path = get()
         
         # Pause listening while talking. Mute STT.
-        put('speech_recognition','mute')
+        # put('speech_recognition','mute')
 
         try:
             playsound.playsound(path)
@@ -20,4 +20,4 @@ def _in(ctx):
             _logger.error("Error playing sound: {}".format(ex))
 
         # Audio complete. Begin listening. Unmute STT.
-        put('speech_recognition','unmute')
+        # put('speech_recognition','unmute')

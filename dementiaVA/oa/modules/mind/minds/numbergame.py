@@ -26,6 +26,12 @@ def stop_game():
         oa.legacy.mind.current_game = None
         mind("dem")
 
+@command(["rules", "how", "instructions", "explain"])
+def instructions():
+    say('Here is how the game works. First I will say two numbers, and you will say if the second number ' +
+        'is higher or lower than the first. ' +
+        'I will then say another number, and you will say if it is higher or lower than the last number I said.')
+
 def start():
     say('Let\'s Begin')
     _new_game()

@@ -33,9 +33,9 @@ def numbergame_yes():
 def numbergame_no():
     say('Okay, we won\'t play.')
 
-@command(["number game"])
+@command(["number", "game"])
 def number_game():
-    yes_no('Do you want to play?', numbergame_yes, numbergame_no)
+    yes_no('Do you want to play the number game?', numbergame_yes, numbergame_no)
 
 
 """
