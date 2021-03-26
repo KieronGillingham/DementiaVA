@@ -37,6 +37,9 @@ def numbergame_no():
 def number_game():
     yes_no('Do you want to play the number game?', numbergame_yes, numbergame_no)
 
+@command(["radio"])
+def radio():
+    mind('radio')
 
 """
 @command(["list commands", "what can i say"])
