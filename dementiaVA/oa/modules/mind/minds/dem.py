@@ -4,12 +4,18 @@ from oa.modules.abilities.interact import say, play, mind, yes_no, user_answer
 from oa.modules.abilities.other import read_news_feed, diagnostics, read_forecast
 from oa.modules.abilities.other import say_day, say_last_command, say_time
 
+import oa
+
 kws = {}
 
 command = command_registry(kws)
 
+mute_message = False
+
 def start():
-    say('- Hello, I am GLAD. How can I help?')
+    if not oa.legacy.mind.mute_message:
+        say('Hello, I am GLAD. How can I help?')
+        oa.legacy.mind.mute_message = True
 
 
 @command(["what can you do"])
@@ -19,10 +25,10 @@ def what_do():
 
 @command(["demo", "intro", "hello", "start"])
 def run_demo():
-    say('- Hello! How can I help?')
+    say('Hello! How can I help?')
 
 
-@command(["close", "stop", "end"])
+@command(["close", "stop", "end", "off"])
 def close_assistant():
     oa.legacy.hub.finished.set()
 

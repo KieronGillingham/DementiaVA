@@ -23,28 +23,29 @@ def _get_player():
     return oa.legacy.mind.player
 
 
-@command(["close", "stop", "end"])
+@command(["close", "stop", "end", "quit", "stopped"])
 def stop():
     player = _get_player()
-    player.quit()
+    player.stop()
+    say("Stopping the radio.")
     mind("dem")
 
 
-@command(["quieter"])
+@command(["quieter", "quiet", "quite", "down"])
 def volume_down():
     player = _get_player()
     new_volume = player.audio_get_volume() - 25
-    if new_volume < 0:
+    if new_volume <= 0:
         stop()
     else:
         player.audio_set_volume(new_volume)
         print(f'\n---Lowering volume to {new_volume}---\n')
 
-@command(["louder"])
+@command(["louder", "up", "loud", "allowed"])
 def volume_up():
     player = _get_player()
     new_volume = player.audio_get_volume() + 25
-    if new_volume > 100:
+    if new_volume >= 100:
         player.audio_set_volume(100)
         say('Maximum volume.')
     else:
@@ -55,4 +56,6 @@ def volume_up():
 def start():
     player = _get_player()
     player.play()
+    if player.audio_get_volume() <= 50:
+        player.audio.set_volume(50)
     print('\n---Playing Radio---\n')
