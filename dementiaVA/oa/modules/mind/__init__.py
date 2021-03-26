@@ -90,23 +90,7 @@ def _in(ctx):
         # Check for a matching command.
         # TODO: Implement more robust intent detection
 
-        # Split sentence into words.
-        words = t.split(" ")
-        # Compare keywords in sentence with known functions.
-        keywords = []
-        for word in words:
-            func = mind.kws.get(word, None)
-            if func:
-                keywords.append([func, word])
-
-        _logger.debug(f'Identified keywords: {keywords}')
-        if (len(keywords) > 1):
-            from statistics import mode
-            fn = mode(keywords[:][0])
-        elif (len(keywords) == 1):
-            fn = keywords[0][0]
-        else:
-            fn = None
+        fn = oa.modules.abilities.interact.match_intent(t)
 
         if fn is not None:
             # There are two types of commands, stubs and command line text.

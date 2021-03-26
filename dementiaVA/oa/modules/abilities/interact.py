@@ -38,7 +38,7 @@ def answer(text):
     text = text.lower()
     _logger.debug(f'Received: {text}')
     # Get a function from the user_choices dict set by user_answer
-    func = choices.get(text, None)
+    func = match_intent(text, choices)
 
     # If a function is found, clear the choices dict and run the function
     if func:
@@ -51,6 +51,35 @@ def answer(text):
 
     #oa.legacy.mind.switch_back()
 
+
+def match_intent(text, options = None):
+
+    if options is None:
+        # Compare with kws
+        mind = oa.legacy.mind
+        options = mind.kws
+    # else:
+        # compare with dict
+
+    # Split sentence into words.
+    words = text.split(" ")
+    # Compare keywords in sentence with known functions.
+    keywords = []
+    for word in words:
+        func = options.get(word, None)
+        if func:
+            keywords.append([func, word])
+
+    _logger.debug(f'Identified keywords: {keywords}')
+    if (len(keywords) > 1):
+        from statistics import mode
+        fn = mode(keywords[:][0])
+    elif (len(keywords) == 1):
+        fn = keywords[0][0]
+    else:
+        fn = None
+
+    return fn
 
 def yes_no(msg, yes, no):
     """ Receive a yes or no answer from the user. """
