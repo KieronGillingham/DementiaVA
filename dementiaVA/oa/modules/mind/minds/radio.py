@@ -3,7 +3,6 @@ import vlc
 from oa.core.util import command_registry
 
 from oa.modules.abilities.interact import say, mind
-from oa.modules.abilities.highlow import Game
 
 import oa.legacy
 
@@ -46,10 +45,12 @@ def volume_up():
     player = _get_player()
     new_volume = player.audio_get_volume() + 25
     if new_volume > 100:
+        player.audio_set_volume(100)
         say('Maximum volume.')
     else:
         print(f'\n---Raising volume to {new_volume}---\n')
         player.audio_set_volume(new_volume)
+
 
 def start():
     player = _get_player()
