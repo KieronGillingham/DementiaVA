@@ -14,7 +14,7 @@ def start():
 
 @command(["what can you do"])
 def what_do():
-    say('At the moment, I can\'t do very much. But I can play a simple number game with you.')
+    say('At the moment, I can play a simple number game with you, or put some music on.')
 
 
 @command(["demo", "intro", "hello", "start"])
@@ -26,20 +26,33 @@ def run_demo():
 def close_assistant():
     oa.legacy.hub.finished.set()
 
+
 def numbergame_yes():
     say('Okay let\'s play.')
     mind('numbergame')
 
+
 def numbergame_no():
     say('Okay, we won\'t play.')
+
 
 @command(["number", "game"])
 def number_game():
     yes_no('Do you want to play the number game?', numbergame_yes, numbergame_no)
 
-@command(["radio"])
+
+@command(["radio", "music"])
 def radio():
+    yes_no('Do you want to listen to the radio?', radio_yes, radio_no)
+
+
+def radio_yes():
+    say('I\'ll play the radio for you then.')
     mind('radio')
+
+
+def radio_no():
+    say('Okay, I won\'t put any music on.')
 
 """
 @command(["list commands", "what can i say"])
