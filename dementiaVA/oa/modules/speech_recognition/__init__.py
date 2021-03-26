@@ -1,18 +1,14 @@
 # Logging
 import logging
+_logger = logging.getLogger(__name__)
 
 # OS interaction
-import os
 import time
-import oa.legacy
-import os.path
 import deepspeech
 import numpy as np
 
 from oa.modules.abilities.core import get, empty, info
-from oa.modules.abilities.system import download_file, write_file, stat_mtime
 
-_logger = logging.getLogger(__name__)
 
 def get_model(ctx):
     _logger.info('Initializing speech recognition model')
@@ -66,14 +62,14 @@ def _in(ctx):
                     data = frame.reshape(-1)
                     stream_context.feedAudioContent(np.frombuffer(data, np.int16))
                 else:
-                    _logger.debug("end utterence")
+                    # _logger.debug("end utterence")
 
                     text = stream_context.finishStream()
 
                     if text is not None:
                         if (text is None) or (text.strip() == ''):
                             continue
-                        _logger.info("Heard: {}".format(text))
+                        _logger.info(f'Heard: "{text.upper()}"')
                         yield text
                     else:
                         _logger.warning('Speech not recognized')

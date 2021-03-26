@@ -2,19 +2,19 @@ import glob
 import os
 import subprocess
 
-import requests
+# import requests
 
 import oa.legacy
 
 from oa.modules.abilities.core import info
 
-def download_file(url, path):
-    """ Download a file by url and save it to a local path. """
-    r = requests.get(url, stream = True)
-    if r.status_code == 200:
-        with open(path, 'wb') as f:
-            for chunk in r:
-                f.write(chunk)
+# def download_file(url, path):
+#     """ Download a file by url and save it to a local path. """
+#     r = requests.get(url, stream = True)
+#     if r.status_code == 200:
+#         with open(path, 'wb') as f:
+#             for chunk in r:
+#                 f.write(chunk)
 
 def find_file(fname):
     """ Search for a file with `fname` in all OA sub-directories.

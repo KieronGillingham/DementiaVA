@@ -77,7 +77,7 @@ def thread_loop(hub, part, b):
         try:
             for msg in part._in(hub):
                 for listener in part.output:
-                    _logger.debug('{} -> {}'.format(part.name, listener.name))
+                    # _logger.debug('{} -> {}'.format(part.name, listener.name))
                     listener.wire_in.put(msg)
         except Exception as ex:
             _logger.error("Error processing queue: {}".format(ex))

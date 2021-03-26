@@ -3,7 +3,6 @@ import logging
 _logger = logging.getLogger(__name__)
 
 import importlib
-import logging
 import os
 
 import oa.legacy
@@ -80,7 +79,7 @@ def _in(ctx):
 
     while not ctx.finished.is_set():
         text = get()
-        _logger.debug('Input: {}'.format(text))
+        #_logger.debug('Input: {}'.format(text))
         mind = oa.legacy.mind
         if (text is None) or (text.strip() == ''):
             # Nothing to do.

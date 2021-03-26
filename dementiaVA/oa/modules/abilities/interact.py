@@ -10,12 +10,13 @@ def user_answer(choices):
     """ Set the possible user choices as a dict:
     {'SPOKEN PHRASE': function_to_call, ...}
     """
-    #mind(mind_for_answer, 0) # No history.
+    # mind(mind_for_answer, 0) # No history.
     try:
         oa.legacy.mind.user_choices = choices
         _logger.debug(f"Setting choices: {choices}")
     except Exception as ex:
-        _logger.debug(f'{oa.legacy.mind} does not accept user choices')
+        # _logger.debug(f'{oa.legacy.mind} does not accept user choices')
+        return
 
 def answer(text):
     """ Process an unknown user response and compare it to the current choices in the mind. """
@@ -32,7 +33,7 @@ def answer(text):
 
     except Exception as ex:
         # If choices cannot be accessed, then the mind does not accept user choices
-        _logger.debug(f'{oa.legacy.mind} does not accept user choices')
+        # _logger.debug(f'{oa.legacy.mind} does not accept user choices')
         return
 
     text = text.lower()
@@ -70,11 +71,13 @@ def match_intent(text, options = None):
         if func:
             keywords.append([func, word])
 
-    _logger.debug(f'Identified keywords: {keywords}')
+
     if (len(keywords) > 1):
+        _logger.debug(f'Identified keywords: {keywords}')
         from statistics import mode
         fn = mode(keywords[:][0])
     elif (len(keywords) == 1):
+        _logger.debug(f'Identified keyword: {keywords}')
         fn = keywords[0][0]
     else:
         fn = None

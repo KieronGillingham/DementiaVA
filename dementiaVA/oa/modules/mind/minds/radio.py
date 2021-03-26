@@ -57,5 +57,5 @@ def start():
     player = _get_player()
     player.play()
     if player.audio_get_volume() <= 50:
-        player.audio.set_volume(50)
+        player.audio_set_volume(50)
     print('\n---Playing Radio---\n')
