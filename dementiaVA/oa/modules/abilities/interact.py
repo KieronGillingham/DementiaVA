@@ -11,19 +11,34 @@ def user_answer(choices):
     {'SPOKEN PHRASE': function_to_call, ...}
     """
     #mind(mind_for_answer, 0) # No history.
-    oa.legacy.mind.user_choices = choices
-    _logger.debug(f"Setting choices: {choices}")
+    try:
+        oa.legacy.mind.user_choices = choices
+        _logger.debug(f"Setting choices: {choices}")
+    except Exception as ex:
+        _logger.debug(f'{oa.legacy.mind} does not accept user choices')
 
 def answer(text):
     """ Process an unknown user response and compare it to the current choices in the mind. """
     # If no choice is active, do nothing.
-    if not oa.legacy.mind.user_choices:
+    choices = None
+    try:
+        choices = oa.legacy.mind.user_choices
+
+        # If choices dict empty or nonexistent is set then the mind is not awaiting a response
+        # n.b. An empty dict returns False
+        if choices is None or choices is False:
+            _logger.debug(f'{oa.legacy.mind} is not pending an answer')
+            return
+
+    except Exception as ex:
+        # If choices cannot be accessed, then the mind does not accept user choices
+        _logger.debug(f'{oa.legacy.mind} does not accept user choices')
         return
 
     text = text.lower()
     _logger.debug(f'Received: {text}')
     # Get a function from the user_choices dict set by user_answer
-    func = oa.legacy.mind.user_choices.get(text, None)
+    func = choices.get(text, None)
 
     # If a function is found, clear the choices dict and run the function
     if func:
