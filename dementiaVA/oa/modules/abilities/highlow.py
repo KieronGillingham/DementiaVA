@@ -61,7 +61,7 @@ def get_random_number():
 
 def get_response(response):
     response = None
-    if response in ("higher", "high", "up", "bigger", "larger", "more"):
+    if response in ("higher", "hire", "high", "up", "bigger", "larger", "more"):
         response = "higher"
     elif response in ("lower", "low", "down", "smaller", "less"):
         response = "lower"

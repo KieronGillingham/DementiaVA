@@ -30,7 +30,7 @@ def load_mind(path):
 
     M = importlib.import_module("oa.modules.mind.minds"+".{}".format(mind.name))
     mind.__dict__.update(M.__dict__)
-    
+
     # Add command keywords without spaces.
     mind.kws = {}
     for key, value in M.kws.items():
@@ -65,7 +65,6 @@ def load_minds():
     mind_path = os.path.join(os.path.dirname(__file__), 'minds')
     for mind in os.listdir(mind_path):
         if mind.lower().endswith('.py'):
-            _logger.info("<- {}".format(mind))
             m = load_mind(os.path.join(mind_path, mind))
             oa.legacy.minds[m.name] = m
     _logger.info('Minds loaded!')
@@ -75,41 +74,30 @@ def _in(ctx):
     default_mind = 'dem'
     load_minds()
     set_mind(default_mind)
-    _logger.info('"{}" is now listening.'.format(default_mind))
+    _logger.info(f'"{default_mind}" is now listening.')
 
     while not ctx.finished.is_set():
         text = get()
-        #_logger.debug('Input: {}'.format(text))
-        mind = oa.legacy.mind
         if (text is None) or (text.strip() == ''):
-            # Nothing to do.
+            # Nothing to do
             continue
         t = text.upper()
 
-        # Check for a matching command.
-        # TODO: Implement more robust intent detection
-
+        # Check for a matching command
+        # TODO: Implement yet more robust intent detection
         fn = oa.modules.abilities.interact.match_intent(t)
 
+        # If a function is identified, call it
         if fn is not None:
-            # There are two types of commands, stubs and command line text.
-            # For stubs, call `perform()`.
             if oa.legacy.isCallable(fn):
                 call_function(fn)
+                # Keep note of most recent command
                 oa.legacy.oa.last_command = t
-            # For strings, call `sys_exec()`.
-            # TODO: Remove command line functions
-            elif isinstance(fn, str):
-                sys_exec(fn)
-                oa.legacy.oa.last_command = t
-            else:
-                # Any unknown command raises an exception.
-                raise Exception("Unable to process: {}".format(text))
         elif t is not None:
-            # If function is not none, than pass the text to interact
+            # If function is none, than pass the text to interact
             oa.modules.abilities.interact.answer(text)
         else:
             # Input not registered as command.
-            _logger.debug("'{}' is not a command".format(text))
+            _logger.debug(f"'{text}' was not processed.")
         yield text
 

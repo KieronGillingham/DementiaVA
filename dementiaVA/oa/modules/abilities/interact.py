@@ -56,7 +56,7 @@ def answer(text):
 def match_intent(text, options = None):
 
     if options is None:
-        # Compare with kws
+        # Compare with kws of current mind
         mind = oa.legacy.mind
         options = mind.kws
     # else:
