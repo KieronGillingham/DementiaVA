@@ -90,7 +90,7 @@ def _in(ctx):
                     # Handle phrase being too long by cutting off the audio.
                     elapsed_time += seconds_per_buffer
                     if _config.get("timeout") and (elapsed_time - phrase_start_time > _config.get("timeout")):
-                        _logger.debug("Recording too long.")
+                        _logger.debug("Recording too long")
                         break
 
                     buf = stream.read(_config.get("chunk"))[0]
@@ -105,13 +105,13 @@ def _in(ctx):
                     else:
                         pause_count += 1
                     if pause_count > pause_buffer_count:  # End of the phrase.
-                        _logger.debug("Pause detected.")
+                        _logger.debug("Pause detected")
                         break
 
                 # Check how long the detected phrase is and retry listening if the phrase is too short.
                 phrase_count -= pause_count  # Exclude the buffers for the pause before the phrase.
                 if phrase_count >= phrase_buffer_count or len(buf) == 0:
-                    _logger.debug("End recording.")
+                    _logger.debug("End recording")
                     break  # Phrase is long enough or we've reached the end of the stream, so stop listening.
 
             # Obtain frame data.

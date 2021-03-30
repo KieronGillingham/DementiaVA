@@ -29,6 +29,7 @@ def _in(ctx):
     mute = 0
     model = get_model(ctx)
     if model is None:
+        _logger.error('No model loaded')
         return None
 
     while not ctx.finished.is_set():
@@ -57,12 +58,13 @@ def _in(ctx):
         # Obtain audio data.
         try:
             stream_context = model.createStream()
+            _logger.debug('Streaming audio data')
             for frame in raw_data:
                 if frame is not None:
                     data = frame.reshape(-1)
                     stream_context.feedAudioContent(np.frombuffer(data, np.int16))
                 else:
-                    # _logger.debug("end utterence")
+                    _logger.debug("End utterence")
 
                     text = stream_context.finishStream()
 
