@@ -49,9 +49,6 @@ class Audio(object):
         # if not default device
         if self.device:
             kwargs['input_device_index'] = self.device
-        elif file is not None:
-            self.chunk = 320
-            self.wf = wave.open(file, 'rb')
 
         self.stream = self.pa.open(**kwargs)
         self.stream.start_stream()
@@ -115,7 +112,7 @@ class VADAudio(Audio):
             while True:
                 yield self.read_resampled()
 
-    def vad_collector(self, padding_ms=100, ratio=0.25, frames=None):
+    def vad_collector(self, padding_ms=1000, ratio=0.25, frames=None):
         """Generator that yields series of consecutive audio frames comprising each utterence, separated by yielding a single None.
             Determines voice activity by ratio of frames in padding_ms. Uses a buffer to include padding_ms prior to being triggered.
             Example: (frame, ..., frame, None, frame, ..., frame, None, ...)
@@ -188,12 +185,8 @@ def main(ARGS):
             if ARGS.savewav: wav_data.extend(frame)
         else:
             if spinner: spinner.stop()
-            print(length)
             length = 0
             logging.debug("end utterence")
-            if ARGS.savewav:
-                vad_audio.write_wav(os.path.join(ARGS.savewav, datetime.now().strftime("savewav_%Y-%m-%d_%H-%M-%S_%f.wav")), wav_data)
-                wav_data = bytearray()
             text = stream_context.finishStream()
             print(f"{datetime.now()}: Recognized: {text}")
             stream_context = model.createStream()
