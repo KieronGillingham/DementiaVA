@@ -53,35 +53,50 @@ def answer(text):
     #oa.legacy.mind.switch_back()
 
 
-def match_intent(text, options = None):
-
+def match_intent(text, options=None):
+    """Given an input text, match it to either a function in the current mind, or one of a dict of options."""
     if options is None:
-        # Compare with kws of current mind
-        mind = oa.legacy.mind
-        options = mind.kws
-    # else:
-        # compare with dict
+        # Use kws of current mind as options
+        options = oa.legacy.mind.kws
+
+    # Handle keywords that are phrases
+    """
+    phrases = {}
+    for keyword in options:
+        words = keyword.split(" ")
+        if len(words) == 1:
+            # Single word; not a phrase. Do nothing.
+            continue
+        else:
+            # Keyword is a phrase
+            phrases[keyword] = options[keyword]
+    """
+
+    keywords = []
+    for keyword in options:
+        if text.find(keyword) != -1:
+            func = options[keyword]
+            keywords.append([func, keyword])
+
 
     # Split sentence into words.
-    words = text.split(" ")
+    #words = text.split(" ")
     # Compare keywords in sentence with known functions.
-    keywords = []
-    for word in words:
-        func = options.get(word, None)
-        if func:
-            keywords.append([func, word])
 
+    #for word in words:
+    #    func = options.get(word, None)
+    #    if func:
+    #        keywords.append([func, word])
+
+    _logger.debug(f'Identified keywords: {keywords}')
 
     if (len(keywords) > 1):
-        _logger.debug(f'Identified keywords: {keywords}')
         from statistics import mode
         fn = mode(keywords[:][0])
     elif (len(keywords) == 1):
-        _logger.debug(f'Identified keyword: {keywords}')
         fn = keywords[0][0]
     else:
         fn = None
-
     return fn
 
 def yes_no(msg, yes, no):
