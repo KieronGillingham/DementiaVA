@@ -1,3 +1,5 @@
+from time import sleep
+
 import vlc
 
 from oa.core.util import command_registry
@@ -23,11 +25,19 @@ def _get_player():
     return oa.legacy.mind.player
 
 
-@command(["close", "stop", "end", "quit", "stopped"])
+@command(["close", "stop", "end", "stopped", "no more"])
 def stop():
     player = _get_player()
-    player.stop()
+
     say("Stopping the radio.")
+
+    volume = player.audio_get_volume()
+    while volume > 0:
+        volume -= 4
+        player.audio_set_volume(volume)
+        sleep(.5)
+
+    player.stop()
     mind("dem")
 
 
