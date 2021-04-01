@@ -18,7 +18,7 @@ def start():
         oa.legacy.mind.mute_message = True
 
 
-@command(["can you do", "you can do", "what you", "do"])
+@command(["can you", "you can do", "what you", "do", "help"])
 def what_do():
     say('At the moment, I can play a simple number game with you, or put some music on.')
 

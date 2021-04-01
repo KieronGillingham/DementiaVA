@@ -27,6 +27,7 @@ def get_model(ctx):
 def _in(ctx):
     mute = 0
     model = get_model(ctx)
+    stream_context = model.createStream()
     if model is None:
         _logger.error('No model loaded')
         return None
@@ -45,32 +46,29 @@ def _in(ctx):
             else:
                 _logger.error("Unknown string received: '{}'".format(raw_data))
             continue
-        else:
-            try:
-                #raw_data.append(None) ## Append empty frame to deque to indicate end of audio
-                pass
-            except Exception as ex:
-                _logger.error("Audio data in invalid format - {}".format(ex))
+
         # Mute mode. Do not listen until unmute.
         if mute:
             continue
 
         # Obtain audio data.
         try:
-            _logger.debug('Streaming audio data')
-            stream_context = None
             for frame in raw_data:
                 if stream_context is None:
                     stream_context = model.createStream()
                 if frame is not None:
-                    stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
+                    try:
+                        stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
+                    except RuntimeError:
+                        stream_context = model.createStream()
+                        continue
                 else:
-                    _logger.debug("End utterence")
 
                     text = stream_context.finishStream()
 
                     if text is not None:
                         if (text is None) or (text.strip() == ''):
+                            _logger.info('No speech detected')
                             continue
                         _logger.info(f'Heard: "{text.upper()}"')
                         yield text

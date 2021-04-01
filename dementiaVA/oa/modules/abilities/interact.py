@@ -48,7 +48,7 @@ def answer(text):
         call_function(func)
     else:
         # If a function isn't found, alert the user.
-        say('sorry, I didn\'t get that')
+        say('Sorry, I didn\'t get that')
 
     #oa.legacy.mind.switch_back()
 
@@ -59,44 +59,22 @@ def match_intent(text, options=None):
         # Use kws of current mind as options
         options = oa.legacy.mind.kws
 
-    # Handle keywords that are phrases
-    """
-    phrases = {}
-    for keyword in options:
-        words = keyword.split(" ")
-        if len(words) == 1:
-            # Single word; not a phrase. Do nothing.
-            continue
-        else:
-            # Keyword is a phrase
-            phrases[keyword] = options[keyword]
-    """
-
     keywords = []
     for keyword in options:
         if text.find(keyword) != -1:
             func = options[keyword]
             keywords.append([func, keyword])
 
-
-    # Split sentence into words.
-    #words = text.split(" ")
-    # Compare keywords in sentence with known functions.
-
-    #for word in words:
-    #    func = options.get(word, None)
-    #    if func:
-    #        keywords.append([func, word])
-
-    _logger.debug(f'Identified keywords: {keywords}')
-
     if (len(keywords) > 1):
         from statistics import mode
         fn = mode(keywords[:][0])
+        _logger.debug(f'Identified keywords: {keywords}')
     elif (len(keywords) == 1):
         fn = keywords[0][0]
+        _logger.debug(f'Identified keyword: {keywords}')
     else:
         fn = None
+        _logger.debug(f'No keywords identified.')
     return fn
 
 def yes_no(msg, yes, no):

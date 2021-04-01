@@ -25,7 +25,7 @@ def _get_player():
     return oa.legacy.mind.player
 
 
-@command(["close", "stop", "end", "stopped", "no more"])
+@command(["close", "stop", "end", "no more"])
 def stop():
     player = _get_player()
 
