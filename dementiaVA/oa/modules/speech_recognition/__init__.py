@@ -9,7 +9,6 @@ import numpy as np
 
 from oa.modules.abilities.core import get, empty, info
 
-
 def get_model(ctx):
     _logger.info('Initializing speech recognition model')
     try:
@@ -48,7 +47,8 @@ def _in(ctx):
             continue
         else:
             try:
-                raw_data.append(None) ## Append empty frame to deque to indicate end of audio
+                #raw_data.append(None) ## Append empty frame to deque to indicate end of audio
+                pass
             except Exception as ex:
                 _logger.error("Audio data in invalid format - {}".format(ex))
         # Mute mode. Do not listen until unmute.
@@ -57,12 +57,13 @@ def _in(ctx):
 
         # Obtain audio data.
         try:
-            stream_context = model.createStream()
             _logger.debug('Streaming audio data')
+            stream_context = None
             for frame in raw_data:
+                if stream_context is None:
+                    stream_context = model.createStream()
                 if frame is not None:
-                    data = frame.reshape(-1)
-                    stream_context.feedAudioContent(np.frombuffer(data, np.int16))
+                    stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
                 else:
                     _logger.debug("End utterence")
 
