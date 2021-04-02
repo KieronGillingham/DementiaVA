@@ -1,3 +1,4 @@
+import random
 from time import sleep
 
 import vlc
@@ -18,12 +19,31 @@ command = command_registry(kws)
 player = None
 
 def _get_player():
-    url = 'https://streaming.radio.co/s188ef6afc/listen'
     if not oa.legacy.mind.player:
         _logger.debug('Loading media player')
-        oa.legacy.mind.player = vlc.MediaPlayer(url)
+        player = vlc.MediaPlayer(get_station())
+        oa.legacy.mind.player = player
     return oa.legacy.mind.player
 
+
+@command(["change", "song", "next", "station", "different"])
+def change_station():
+    oa.legacy.mind.player.stop()
+    oa.legacy.mind.player.release()
+
+    player = vlc.MediaPlayer(get_station())
+    oa.legacy.mind.player = player
+    player.play()
+
+def get_station():
+    stations = [
+        'http://s2.radio.co/s07cd038f1/listen',
+        'http://s2.radio.co/sf0e4f0fe8/listen',
+        'http://streaming.radio.co/s188ef6afc/listen',
+        'http://streaming.radio.co/sba397e5cb/listen',
+        'http://streamer.radio.co/sa37ec8d4a/listen'
+    ]
+    return random.choice(stations)
 
 @command(["close", "stop", "end", "no more"])
 def stop():
@@ -66,6 +86,7 @@ def volume_up():
 def start():
     player = _get_player()
     player.play()
+    print(player.is_playing())
     if player.audio_get_volume() <= 50:
         player.audio_set_volume(50)
     print('\n---Playing Radio---\n')
