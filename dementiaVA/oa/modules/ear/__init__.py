@@ -14,6 +14,7 @@ import wave
 import webrtcvad
 from halo import Halo
 from scipy import signal
+from oa.modules.abilities.core import put
 
 _logger = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ def _in(ctx):
 
     while not ctx.finished.is_set():
         yield frames
+        frames = vad_audio.vad_collector()
 
 class Audio(object):
     """Streams raw audio from microphone. Data is received in a separate thread, and stored in a buffer, to be read from."""
@@ -166,14 +168,21 @@ class VADAudio(Audio):
             if len(frame) < 160:
                 return
 
+            # Determine if audio input is loud enough to count as speech
             is_speech = self.vad.is_speech(frame, self.sample_rate)
 
+            # If audio is not currently being streamed out
             if not triggered:
+                # Save frame to buffer
                 ring_buffer.append((frame, is_speech))
+
+                # If ratio of speaking frames in buffer is higher than threshold
                 num_voiced = len([f for f, speech in ring_buffer if speech])
                 if num_voiced > ratio * ring_buffer.maxlen:
+                    # Start streaming
                     triggered = True
-                    _logger.debug("Audio detected")
+                    _logger.debug("Utterance detected")
+
                     for f, s in ring_buffer:
                         yield f
                     ring_buffer.clear()
@@ -184,5 +193,7 @@ class VADAudio(Audio):
                 num_unvoiced = len([f for f, speech in ring_buffer if not speech])
                 if num_unvoiced > ratio * ring_buffer.maxlen:
                     triggered = False
+                    _logger.debug("Utterance complete")
                     yield None
                     ring_buffer.clear()
+                    break
