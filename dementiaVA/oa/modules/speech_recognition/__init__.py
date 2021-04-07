@@ -53,27 +53,28 @@ def _in(ctx):
 
         # Obtain audio data.
         try:
-            for frame in raw_data:
-                if stream_context is None:
+            #for frame in raw_data:
+            frame = raw_data
+            if stream_context is None:
+                stream_context = model.createStream()
+            if frame is not None:
+                try:
+                    stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
+                except RuntimeError:
                     stream_context = model.createStream()
-                if frame is not None:
-                    try:
-                        stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
-                    except RuntimeError:
-                        stream_context = model.createStream()
+                    continue
+            else:
+
+                text = stream_context.finishStream()
+
+                if text is not None:
+                    if (text is None) or (text.strip() == ''):
+                        _logger.info('No speech detected')
                         continue
+                    _logger.info(f'Heard: "{text.upper()}"')
+                    yield text
                 else:
-
-                    text = stream_context.finishStream()
-
-                    if text is not None:
-                        if (text is None) or (text.strip() == ''):
-                            _logger.info('No speech detected')
-                            continue
-                        _logger.info(f'Heard: "{text.upper()}"')
-                        yield text
-                    else:
-                        _logger.warning('Speech not recognized')
+                    _logger.warning('Speech not recognized')
 
 
         except Exception as e:

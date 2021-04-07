@@ -58,11 +58,12 @@ def _in(ctx):
                          device=None,
                          input_rate=16000)
 
-    frames = vad_audio.vad_collector()
+    collector = vad_audio.vad_collector()
 
     while not ctx.finished.is_set():
-        yield frames
-        frames = vad_audio.vad_collector()
+        for frame in collector:
+            yield frame
+        collector = vad_audio.vad_collector()
 
 class Audio(object):
     """Streams raw audio from microphone. Data is received in a separate thread, and stored in a buffer, to be read from."""
