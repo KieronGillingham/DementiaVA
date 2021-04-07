@@ -1,70 +1,39 @@
 # Logging
 import logging
+_logger = logging.getLogger(__name__)
 
 # OS interaction
-import os
 import time
-import oa.legacy
-import os.path
 import deepspeech
 import numpy as np
 
 from oa.modules.abilities.core import get, empty, info
-from oa.modules.abilities.system import download_file, write_file, stat_mtime
 
-_decoders = {}
-_logger = logging.getLogger(__name__)
-
-
-def config_stt(cache_dir, keywords, kws_last_modification_time_in_sec=None):
-    _ = oa.legacy.Core()
-    cache_path = lambda x: os.path.join(cache_dir, x)
-    _.lang_file = cache_path('lm')
-    _.fsg_file = None
-    _.dic_file = cache_path('dic')
-    _.hmm_dir = cache_path('hmm')
-
-    # Save keywords for further pattern matching. Call `config_stt()` when switching minds to check for command file changes.
-    _.kwords = {}
-    _.max_w_cnt = 3
-    for phrase in keywords:
-        spl_ph = phrase.strip().split(' ')
-        w_cnt = len(spl_ph)
-        if w_cnt > _.max_w_cnt:
-            _.max_w_cnt = w_cnt
-        for kword in spl_ph:
-            # Combine all phrases which use keywords.
-            r_phrases = _.kwords.setdefault(kword,{})
-            r_phrases[phrase] = w_cnt
-
-    # Save phrases.
-    _.phrases = [x.strip().replace('%d', '').upper() for x in sorted(keywords)]
-
-    # Check if commands file was modified.
-    if kws_last_modification_time_in_sec:
-        if os.path.exists(_.dic_file) and (kws_last_modification_time_in_sec < stat_mtime(_.dic_file)):
-            return _
-    _.strings_file = cache_path("sentences.corpus")
-    data = '\n'.join(_.phrases)
-    write_file(_.strings_file, data)
-
-    return _
-
-def get_decoder():
-    # XXX: race condition when mind isn't set yet
-    mind = oa.legacy.mind
-    if not hasattr(_decoders, mind.name):
-        print('Initializing model...')
-        model = deepspeech.Model("/home/mycroft/deepspeech-0.9.3-models.pbmm")
-        model.enableExternalScorer("/home/mycroft/deepspeech-0.9.3-models.scorer")
-        return model
+def get_model(ctx):
+    _logger.info('Initializing speech recognition model')
+    try:
+        config = ctx.config
+        model_path = config["deepspeech_model"]
+        scorer_path = config["deepspeech_scorer"]
+        model = deepspeech.Model(model_path)
+        model.enableExternalScorer(scorer_path)
+        if model is not None:
+            _logger.info('Speech recognition model loaded')
+    except Exception as ex:
+        _logger.error('Speech recognition model/scorer failed to load - {}'.format(ex))
+        model = None
+    return model
 
 def _in(ctx):
     mute = 0
+    model = get_model(ctx)
+    stream_context = model.createStream()
+    if model is None:
+        _logger.error('No model loaded')
+        return None
 
     while not ctx.finished.is_set():
         raw_data = get()
-        raw_data.append(None)
         if isinstance(raw_data, str):
             if raw_data == 'mute':
                 _logger.debug('Muted')
@@ -74,33 +43,37 @@ def _in(ctx):
                 mute = 0
                 time.sleep(.9)
                 empty()
+            else:
+                _logger.error("Unknown string received: '{}'".format(raw_data))
             continue
-            
+
         # Mute mode. Do not listen until unmute.
         if mute:
             continue
 
         # Obtain audio data.
         try:
-            model = get_decoder()
-            stream_context = model.createStream()
             for frame in raw_data:
+                if stream_context is None:
+                    stream_context = model.createStream()
                 if frame is not None:
-                    data = frame.reshape(-1)
-                    _logger.debug("streaming frame")
-                    stream_context.feedAudioContent(np.frombuffer(data, np.int16))
+                    try:
+                        stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
+                    except RuntimeError:
+                        stream_context = model.createStream()
+                        continue
                 else:
-                    _logger.debug("end utterence")
 
                     text = stream_context.finishStream()
 
                     if text is not None:
                         if (text is None) or (text.strip() == ''):
+                            _logger.info('No speech detected')
                             continue
-                        _logger.info("Heard: {}".format(text))
+                        _logger.info(f'Heard: "{text.upper()}"')
                         yield text
                     else:
-                        _logger.warn('Speech not recognized')
+                        _logger.warning('Speech not recognized')
 
 
         except Exception as e:

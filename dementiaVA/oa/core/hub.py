@@ -64,13 +64,8 @@ class Hub:
 
 def thread_loop(hub, part, b):
     """ Setup part inputs to the message wire. """
-    # if not isinstance(part.output, list):
-        # raise Exception('No output list defined: ' + part.name)
+    _logger.debug('Starting loop for {}'.format(part.name))
 
-    _logger.debug('Starting')
-    # ready = threading.Event()
-
-    
     if hasattr(part, 'init'):
         part.init()
 
@@ -82,10 +77,8 @@ def thread_loop(hub, part, b):
         try:
             for msg in part._in(hub):
                 for listener in part.output:
-                    _logger.debug('{} -> {}'.format(part.name, listener.name))
+                    # _logger.debug('{} -> {}'.format(part.name, listener.name))
                     listener.wire_in.put(msg)
         except Exception as ex:
             _logger.error("Error processing queue: {}".format(ex))
-
-
-    _logger.debug('Stopped')
+    _logger.debug('Ending loop for {}'.format(part.name))

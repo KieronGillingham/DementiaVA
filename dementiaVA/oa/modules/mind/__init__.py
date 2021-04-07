@@ -3,7 +3,6 @@ import logging
 _logger = logging.getLogger(__name__)
 
 import importlib
-import logging
 import os
 
 import oa.legacy
@@ -23,13 +22,15 @@ def load_mind(path):
     mind.name = os.path.splitext(os.path.basename(mind.module))[0]
     mind.cache_dir = os.path.join(oa.legacy.core_directory, 'cache', mind.name)
 
+    _logger.debug("Loading {} mind".format(mind.name))
+
     # Make directories.
     if not os.path.exists(mind.cache_dir):
         os.makedirs(mind.cache_dir)
 
     M = importlib.import_module("oa.modules.mind.minds"+".{}".format(mind.name))
     mind.__dict__.update(M.__dict__)
-    
+
     # Add command keywords without spaces.
     mind.kws = {}
     for key, value in M.kws.items():
@@ -43,8 +44,14 @@ def set_mind(name, history=True):
     _logger.info('Opening Mind: {}'.format(name))
     if history:
         _history.append(name)
-        
-    oa.legacy.mind = oa.legacy.minds[name]
+
+    try:
+        oa.legacy.mind = oa.legacy.minds[name]
+        if oa.legacy.mind.start:
+            _logger.debug(f'Running start function for {name}')
+            oa.legacy.mind.start()
+    except Exception as ex:
+        _logger.error(f'{name} mind could not be set: {ex}')
     return oa.legacy.mind
 
 def switch_back():
@@ -58,44 +65,39 @@ def load_minds():
     mind_path = os.path.join(os.path.dirname(__file__), 'minds')
     for mind in os.listdir(mind_path):
         if mind.lower().endswith('.py'):
-            _logger.info("<- {}".format(mind))
             m = load_mind(os.path.join(mind_path, mind))
             oa.legacy.minds[m.name] = m
     _logger.info('Minds loaded!')
 
 def _in(ctx):
 
-    default_mind = 'boot'
+    default_mind = 'dem'
     load_minds()
     set_mind(default_mind)
-
-    _logger.debug('"{}" is now listening. Say "Boot Mind!" to see if it can hear you.'.format(default_mind))
-
+    _logger.info(f'"{default_mind}" is now listening.')
 
     while not ctx.finished.is_set():
         text = get()
-        _logger.debug('Input: {}'.format(text))
-        mind = oa.legacy.mind
         if (text is None) or (text.strip() == ''):
-            # Nothing to do.
+            # Nothing to do
             continue
         t = text.upper()
 
-        # Check for a matching command.
-        fn = mind.kws.get(t, None)
+        # Check for a matching command
+        # TODO: Implement yet more robust intent detection
+        fn = oa.modules.abilities.interact.match_intent(t)
 
+        # If a function is identified, call it
         if fn is not None:
-            # There are two types of commands, stubs and command line text.
-            # For stubs, call `perform()`.
             if oa.legacy.isCallable(fn):
                 call_function(fn)
+                # Keep note of most recent command
                 oa.legacy.oa.last_command = t
-            # For strings, call `sys_exec()`.
-            elif isinstance(fn, str):
-                sys_exec(fn)
-                oa.legacy.oa.last_command = t
-            else:
-                # Any unknown command raises an exception.
-                raise Exception("Unable to process: {}".format(text))
+        elif t is not None:
+            # If function is none, than pass the text to interact
+            oa.modules.abilities.interact.answer(text)
+        else:
+            # Input not registered as command.
+            _logger.debug(f"'{text}' was not processed.")
         yield text
 

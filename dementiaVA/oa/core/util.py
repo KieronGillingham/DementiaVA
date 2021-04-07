@@ -24,11 +24,9 @@ def load_module(path):
 
     from oa.legacy import Core
 
-    # An OA module is a folder with an __oa__.py file
-    if not all([
-        os.path.isdir(path),
-        os.path.exists(os.path.join(path, '__oa__.py')),
-    ]): raise Exception("Invalid module: {}".format(path))
+    # Raise exception if module not found
+    if not os.path.isdir(path):
+        raise Exception("Invalid module: {}".format(path))
 
     # Import package
     module_name = os.path.basename(path)

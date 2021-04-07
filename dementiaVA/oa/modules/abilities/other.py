@@ -3,8 +3,6 @@ import random
 import socket
 import string
 
-import feedparser
-
 import oa.legacy
 
 from oa.modules.abilities.core import info
@@ -59,42 +57,10 @@ def random_from_file(fname):
 
 
 def read_forecast():
-    import forecastio
-    """ Get the weather forecast from Dark Sky (darksky.net).
-    Get your API key and longitude / latitude at: https://darksky.net/dev/
-    Install 'forecastio' module with: `pip install python-forcastio` """
-
-    # Weather For Amberg, Germany.
-
-    api_key = "e3f8667cb539171dc2f4b389d33648ce"
-    lat = 49.44287
-    lng = 11.86267
-
-    forecast = forecastio.load_forecast(api_key, lat, lng, lang='en')
-    byNow = forecast.currently()
-    byHour = forecast.hourly()
-    byDay = forecast.daily()
-    weather_summary = """ - The weather is currently %s.\n The temperature is %d degrees Celsius.\n %s \n %s""" %(byNow.summary, int(byNow.temperature),byHour.summary,byDay.summary)
-    say(weather_summary)
+    return None
 
 def read_news_feed(news_feed, category):
-    rss = feedparser.parse(news_feed)
-    info(rss['feed']['title'])
-    say('- Reading %s news.' %category)
-    headline_count = 1
-
-    # Amount of headlines to read.
-    headline_amount = 5
-
-    for post in rss.entries:
-        if(headline_count == headline_amount):
-            break
-        else:
-            headline = post.title
-            exclude = set(string.punctuation)
-            headline = ''.join(ch for ch in headline if ch not in exclude)
-            say(headline)
-            headline_count += 1
+    return None
 
 def lines_to_dict(sLines, func = lambda s : s, params = {}):
     """ Tranlate dictionary string.

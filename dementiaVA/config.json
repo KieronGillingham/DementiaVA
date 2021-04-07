@@ -1,0 +1,5 @@
+{
+  "deepspeech_model" : "/home/glad/deepspeech-0.9.3-models.pbmm",
+  "deepspeech_scorer" : "/home/glad/deepspeech-0.9.3-models.scorer"
+}
+

@@ -16,15 +16,15 @@ def command_loop(hub:object) -> None:
         None
     """
 
-    while not hub.finished.is_set():
-        cmd = input("OA> ")
-        if cmd in ['q', 'quit']:
-            hub.finished.set()
-        elif cmd in ['h', 'help', '?']:
-            print("Help Stuff")
-        elif cmd.find(' ') > -1:
-            p, m = cmd.split(' ', 1)
-            _logger.debug("{} <- {}".format(p, m))
-            hub.put(p, m)
-        else:
-            print("Unrecognized command: {}".format(cmd))
+    # while not hub.finished.is_set():
+    #     cmd = input("OA> ")
+    #     if cmd in ['q', 'quit']:
+    #         hub.finished.set()
+    #     elif cmd in ['h', 'help', '?']:
+    #         print("Help Stuff")
+    #     elif cmd.find(' ') > -1:
+    #         p, m = cmd.split(' ', 1)
+    #         _logger.debug("{} <- {}".format(p, m))
+    #         hub.put(p, m)
+    #     else:
+    #         print("Unrecognized command: {}".format(cmd))

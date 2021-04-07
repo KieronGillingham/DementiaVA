@@ -1,10 +1,3 @@
-# oa
-import collections
-import math
-import audioop
-import sounddevice
-
-# deepspeech
 import time, logging
 from datetime import datetime
 import threading, collections, queue, os, os.path
@@ -16,10 +9,7 @@ import webrtcvad
 from halo import Halo
 from scipy import signal
 
-logging.basicConfig(level=20, handlers=[
-        logging.FileHandler("debug.log"),
-        logging.StreamHandler()
-    ])
+logging.basicConfig(level=20)
 
 class Audio(object):
     """Streams raw audio from microphone. Data is received in a separate thread, and stored in a buffer, to be read from."""
@@ -59,9 +49,6 @@ class Audio(object):
         # if not default device
         if self.device:
             kwargs['input_device_index'] = self.device
-        elif file is not None:
-            self.chunk = 320
-            self.wf = wave.open(file, 'rb')
 
         self.stream = self.pa.open(**kwargs)
         self.stream.start_stream()
@@ -71,7 +58,6 @@ class Audio(object):
         Microphone may not support our native processing sampling rate, so
         resample from input_rate to RATE_PROCESS here for webrtcvad and
         deepspeech
-
         Args:
             data (binary): Input audio stream
             input_rate (int): Input audio rate to resample from
@@ -96,19 +82,10 @@ class Audio(object):
         self.stream.close()
         self.pa.terminate()
 
+    def __str__(self):
+        return f"<BQ:{self.buffer_queue}; BPSS:{self.BLOCKS_PER_SECOND}; D:{self.device}; IR:{self.input_rate}; SR:{self.sample_rate}; BSI:{self.block_size_input}; PA:{self.pa}"
+
     frame_duration_ms = property(lambda self: 1000 * self.block_size // self.sample_rate)
-
-    def write_wav(self, filename, data):
-        logging.info("write wav %s", filename)
-        wf = wave.open(filename, 'wb')
-        wf.setnchannels(self.CHANNELS)
-        # wf.setsampwidth(self.pa.get_sample_size(FORMAT))
-        assert self.FORMAT == pyaudio.paInt16
-        wf.setsampwidth(2)
-        wf.setframerate(self.sample_rate)
-        wf.writeframes(data)
-        wf.close()
-
 
 class VADAudio(Audio):
     """Filter & segment audio with voice activity detection."""
@@ -126,7 +103,7 @@ class VADAudio(Audio):
             while True:
                 yield self.read_resampled()
 
-    def vad_collector(self, padding_ms=1000, ratio=0.75, frames=None):
+    def vad_collector(self, padding_ms=1000, ratio=0.25, frames=None):
         """Generator that yields series of consecutive audio frames comprising each utterence, separated by yielding a single None.
             Determines voice activity by ratio of frames in padding_ms. Uses a buffer to include padding_ms prior to being triggered.
             Example: (frame, ..., frame, None, frame, ..., frame, None, ...)
@@ -138,7 +115,7 @@ class VADAudio(Audio):
         triggered = False
 
         for frame in frames:
-            if len(frame) < 640:
+            if len(frame) < 160:
                 return
 
             is_speech = self.vad.is_speech(frame, self.sample_rate)
@@ -161,136 +138,37 @@ class VADAudio(Audio):
                     yield None
                     ring_buffer.clear()
 
-# init.py
-
-
-DEFAULT_CONFIG = {
-    # The `timeout` parameter is the maximum number of seconds
-    # that a phrase continues before stopping and returning a
-    # result. If the `timeout` is None there will be no phrase time limit.
-    "timeout": None,
-
-    "channels": 1,
-
-    # Sampling rate in Hertz
-    "sample_rate": 16000,
-
-    # size of each sample
-    "sample_width": 2,
-
-    # Number of frames stored in each buffer.
-    "chunk": 1024,
-
-    # Minimum audio energy to consider for recording.
-    "energy_threshold": 300,
-
-    "dynamic_energy_threshold": False,
-    "dynamic_energy_adjustment_damping": 0.15,
-    "dynamic_energy_ratio": 1.5,
-
-    # Seconds of non-speaking audio before a phrase is considered complete.
-    "pause_threshold": 0.8,
-
-    # Minimum seconds of speaking audio before we consider the audio a phrase - values
-    # below this are ignored (for filtering out clicks and pops).
-    "phrase_threshold": 0.3,
-
-    # Seconds of non-speaking audio to keep on both sides of the recording.
-    "non_speaking_duration": 0.8,
-
-    # Set aggressiveness of VAD: an integer between 0 and 3, 0 being the least
-    # aggressive about filtering out non-speech, 3 the most aggressive.
-    "vad_aggressiveness": 3,
-    "model": "/home/mycroft/deepspeech-0.9.3-models.pbmm",
-    "scorer": "/home/mycroft/deepspeech-0.9.3-models.scorer",
-}
-
-def _in(ctx):
-
-    # OpenVA
-    _config = DEFAULT_CONFIG.copy()
-
-    seconds_per_buffer = _config.get("chunk") / _config.get("sample_rate")
-
-    # Deepspeech
+def main():
     # Load DeepSpeech model
-    if os.path.isdir(_config.get("model")):
-        model_dir = _config.get("model")
-        _config.set("model", os.path.join(model_dir, 'output_graph.pb'))
-        _config.set("scorer", os.path.join(model_dir, _config.get("scorer")))
-
     print('Initializing model...')
-    logging.info("_config.get('model'): %s", _config.get("model"))
-    model = deepspeech.Model(_config.get("model"))
-    if _config.get("scorer"):
-        logging.info("_config.get('scorer'): %s", _config.get("scorer"))
-        model.enableExternalScorer(_config.get("scorer"))
+    model = deepspeech.Model("/home/glad/deepspeech-0.9.3-models.pbmm")
+    model.enableExternalScorer("/home/glad/deepspeech-0.9.3-models.scorer")
 
     # Start audio with VAD
-    vad_audio = VADAudio(aggressiveness=_config.get("vad_aggressiveness"),
-                         device=None,  # Use default audio device
-                         input_rate=_config.get("sample_rate"))
+    vad_audio = VADAudio(aggressiveness=3,
+                         device=None,
+                         input_rate=16000)
+
     print("Listening (ctrl-C to exit)...")
     frames = vad_audio.vad_collector()
 
     # Stream from microphone to DeepSpeech using VAD
+    spinner = Halo(spinner='line')
     stream_context = model.createStream()
-
-    for _ in range(
-        pause_count - non_speaking_buffer_count): frames.pop()  # Remove extra non-speaking frames at the end.
-    frame_data = numpy.concatenate(frames)
-    print(frame_data)
-    yield frame_data
-
-    yield frames
-    """
+    length = 0
     for frame in frames:
         if frame is not None:
+            length += 1
+            spinner.start()
             logging.debug("streaming frame")
             stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
-
         else:
+            spinner.stop()
+            length = 0
             logging.debug("end utterence")
             text = stream_context.finishStream()
-            print("Recognized: %s" % text)
+            print(f"{datetime.now()}: Recognized: {text}")
             stream_context = model.createStream()
-            yield text
 
-    # Number of buffers of non-speaking audio during a phrase before the phrase should be considered complete.
-    phrase_buffer_count = math.ceil(_config.get("phrase_threshold") / seconds_per_buffer) # Minimum number of buffers of speaking audio before we consider the speaking audio a phrase.
-    non_speaking_buffer_count = math.ceil(_config.get("non_speaking_duration") / seconds_per_buffer)  # Maximum number of buffers of non-speaking audio to retain before and after a phrase.
-
-    while not ctx.finished.is_set():
-        elapsed_time = 0  # Number of seconds of audio read
-        buf = b""  # An empty buffer means that the stream has ended and there is no data left to read.
-        while not ctx.finished.is_set():
-            frames = collections.deque()
-
-            # Store audio input until the phrase starts
-            while not ctx.finished.is_set():
-                
-                buf = stream.read(_config.get("chunk"))[0]
-                frames.append(buf)
-                if len(frames) > non_speaking_buffer_count:  
-                # Ensure we only keep the required amount of non-speaking buffers.
-                    frames.popleft()
-
-            # Read audio input until the phrase ends.
-            pause_count, phrase_count = 0, 0
-            phrase_start_time = elapsed_time
-            while not ctx.finished.is_set():
-                # Handle phrase being too long by cutting off the audio.
-                elapsed_time += seconds_per_buffer
-                if _config.get("timeout") and (elapsed_time - phrase_start_time > _config.get("timeout")):
-                    break
-
-                buf = stream.read(_config.get("chunk"))[0]
-                frames.append(buf)
-                phrase_count += 1
-
-        # Obtain frame data.
-        for _ in range(pause_count - non_speaking_buffer_count): frames.pop()  # Remove extra non-speaking frames at the end.
-        frame_data = numpy.concatenate(frames)
-        print(frame_data)
-        yield frame_data
-    """
+if __name__ == '__main__':
+    main()
