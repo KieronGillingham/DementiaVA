@@ -1,3 +1,5 @@
+from time import sleep
+
 from oa.core.util import command_registry
 
 from oa.modules.abilities.interact import say, play, mind, yes_no, user_answer
@@ -14,6 +16,8 @@ mute_message = False
 
 def start():
     if not oa.legacy.mind.mute_message:
+        play("startup.wav")
+        sleep(2)
         say('Hello, I am GLAD. How can I help?')
         oa.legacy.mind.mute_message = True
 

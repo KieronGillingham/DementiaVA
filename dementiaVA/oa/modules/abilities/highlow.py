@@ -6,7 +6,7 @@ import random
 from time import sleep
 
 from oa.modules.abilities.core import info
-from oa.modules.abilities.interact import say, user_answer
+from oa.modules.abilities.interact import say, user_answer, play
 
 class Game:
     current_number = None
@@ -44,8 +44,13 @@ class Game:
     def end_of_round(self, correct):
         if correct:
             self.score += 1
+            play("success.wav")
+            sleep(1)
             say("Correct!")
+
         else:
+            play("failure.wav")
+            sleep(1)
             say(f"Sorry. That's wrong. The first number was {self.last_number}, and the second was {self.current_number}.")
 
         say(f'You have got {self.score} correct answers so far.')
