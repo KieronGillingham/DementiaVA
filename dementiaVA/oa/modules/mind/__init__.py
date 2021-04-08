@@ -7,7 +7,7 @@ import os
 
 import oa.legacy
 
-from oa.modules.abilities.core import info, call_function, get
+from oa.modules.abilities.core import info, call_function, get, empty
 from oa.modules.abilities.system import read_file, sys_exec
 
 
@@ -81,6 +81,7 @@ def _in(ctx):
         if (text is None) or (text.strip() == ''):
             # Nothing to do
             continue
+
         t = text.upper()
 
         # Check for a matching command
@@ -89,6 +90,8 @@ def _in(ctx):
 
         # If a function is identified, call it
         if fn is not None:
+            empty('speech_recognition')
+            empty('ear')
             if oa.legacy.isCallable(fn):
                 call_function(fn)
                 # Keep note of most recent command

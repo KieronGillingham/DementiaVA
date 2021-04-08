@@ -65,6 +65,8 @@ def empty(part = None):
         (No parameters. Thread safe) """
     if part is None:
         part = current_part()
+    if isinstance(part, str):
+        part = oa.legacy.hub.parts[part]
     try:
         while True:
             part.wire_in.get(False)
