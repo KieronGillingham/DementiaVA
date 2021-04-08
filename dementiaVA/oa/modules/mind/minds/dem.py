@@ -16,7 +16,7 @@ mute_message = False
 
 def start():
     if not oa.legacy.mind.mute_message:
-        play("startup.wav")
+        play("startup.wav", "Start-up Jingle")
         sleep(2)
         say('Hello, I am GLAD. How can I help?')
         oa.legacy.mind.mute_message = True

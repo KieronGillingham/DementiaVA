@@ -98,8 +98,12 @@ def keys(s):
     return None
 
 
-def play(fname):
+def play(fname, description=None):
     """ Play a sound file. """
+    if description:
+        print(f'+ Sound: {description} +')
+    else:
+        print('+ Sound effect +')
     put('sound', find_file(fname))
 
 
