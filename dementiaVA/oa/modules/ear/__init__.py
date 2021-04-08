@@ -18,45 +18,9 @@ from oa.modules.abilities.core import put
 
 _logger = logging.getLogger(__name__)
 
-DEFAULT_CONFIG = {
-    # The `timeout` parameter is the maximum number of seconds that a phrase continues before stopping and returning a result. If the `timeout` is None there will be no phrase time limit.
-    "timeout": None,
-
-    "channels": 1,
-
-    # Sampling rate in Hertz
-    "sample_rate": 16000,
-
-    # size of each sample
-    "sample_width": 2,
-
-    # Number of frames stored in each buffer.
-    "chunk": 1024,
-
-    # Minimum audio energy to consider for recording.
-    "energy_threshold": 150,
-
-    "dynamic_energy_threshold": False,
-    "dynamic_energy_adjustment_damping": 0.15,
-    "dynamic_energy_ratio": 1.5,
-
-    # Seconds of non-speaking audio before a phrase is considered complete.
-    "pause_threshold": 2,
-
-    # Minimum seconds of speaking audio before we consider the audio a phrase - values below this are ignored (for filtering out clicks and pops).
-    "phrase_threshold": 0.1,
-
-    # Seconds of non-speaking audio to keep on both sides of the recording.
-    "non_speaking_duration": 2,
-}
-
 def _in(ctx):
-    _config = DEFAULT_CONFIG.copy()
-
-    # Start audio with VAD
-    vad_audio = VADAudio(aggressiveness=3,
-                         device=None,
-                         input_rate=16000)
+    # Start audio with VAD (Voice Detection)
+    vad_audio = VADAudio()
 
     collector = vad_audio.vad_collector()
 
@@ -141,7 +105,7 @@ class Audio(object):
 class VADAudio(Audio):
     """Filter & segment audio with voice activity detection."""
 
-    def __init__(self, aggressiveness=3, device=None, input_rate=None, file=None):
+    def __init__(self, aggressiveness=1, device=None, input_rate=16000, file=None):
         super().__init__(device=device, input_rate=input_rate, file=file)
         self.vad = webrtcvad.Vad(aggressiveness)
 
@@ -193,7 +157,6 @@ class VADAudio(Audio):
                 ring_buffer.append((frame, is_speech))
                 num_unvoiced = len([f for f, speech in ring_buffer if not speech])
                 if num_unvoiced > ratio * ring_buffer.maxlen:
-                    triggered = False
                     _logger.debug("Utterance complete")
                     yield None
                     ring_buffer.clear()
