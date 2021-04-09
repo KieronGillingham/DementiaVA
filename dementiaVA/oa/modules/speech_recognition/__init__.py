@@ -69,9 +69,9 @@ def _in(ctx):
 
                 if text is not None:
                     if (text is None) or (text.strip() == ''):
-                        _logger.info('No speech detected')
+                        _logger.debug('No speech detected')
                         continue
-                    _logger.info(f'Heard: "{text.upper()}"')
+                    _logger.debug(f'Heard: "{text.upper()}"')
                     yield text
                 else:
                     _logger.warning('Speech not recognized')

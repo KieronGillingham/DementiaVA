@@ -48,7 +48,7 @@ def answer(text):
         call_function(func)
     else:
         # If a function isn't found, alert the user.
-        say('Sorry, I didn\'t get that')
+        say('Sorry, I didn\'t get that.')
 
     #oa.legacy.mind.switch_back()
 
@@ -98,12 +98,9 @@ def keys(s):
     return None
 
 
-def play(fname, description=None):
+def play(fname, description='Sound Effect'):
     """ Play a sound file. """
-    if description:
-        print(f'+ Sound: {description} +')
-    else:
-        print('+ Sound effect +')
+    print(f'Sound: {description}')
     put('sound', find_file(fname))
 
 

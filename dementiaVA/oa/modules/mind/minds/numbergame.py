@@ -9,6 +9,9 @@ kws = {}
 
 command = command_registry(kws)
 
+import logging
+_logger = logging.getLogger(__name__)
+
 current_game = None
 
 def _new_game():
@@ -16,7 +19,7 @@ def _new_game():
         oa.legacy.mind.current_game = Game()
         oa.legacy.mind.current_game.start()
     else:
-        print('Already a game going.')
+        _logger.debug("Game instance already exists")
 
 
 @command(["close", "stop", "end"])
@@ -33,5 +36,5 @@ def instructions():
         'I will then say another number, and you will say if it is higher or lower than the last number I said.')
 
 def start():
-    say('Let\'s Begin')
+    say('Let\'s begin.')
     _new_game()
