@@ -72,10 +72,3 @@ def empty(part = None):
             part.wire_in.get(False)
     except oa.legacy.queue.Empty:
         pass
-
-def quit_app():
-    quit(0)
-
-def close():
-    """ Close Open Assistant. """
-    quit()

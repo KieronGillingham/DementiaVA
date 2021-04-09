@@ -94,10 +94,6 @@ def say(text):
         put('voice', text)
 
 
-def keys(s):
-    return None
-
-
 def play(fname, description='Sound Effect'):
     """ Play a sound file. """
     print(f'Sound: {description}')

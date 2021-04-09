@@ -8,8 +8,6 @@ import os
 import oa.legacy
 
 from oa.modules.abilities.core import info, call_function, get, empty
-from oa.modules.abilities.system import read_file, sys_exec
-
 
 """ Core mind functions. """
 
