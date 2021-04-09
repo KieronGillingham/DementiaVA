@@ -32,9 +32,11 @@ def run_demo():
     say('Hello! How can I help?')
 
 
-@command(["close", "stop", "end", "off"])
+@command(["close", "stop", "end", "off", "sleep"])
 def close_assistant():
     oa.legacy.hub.finished.set()
+    say('Shutting down.')
+    play('sleep.wav', "Shut-down Jingle")
 
 
 def numbergame_yes():
