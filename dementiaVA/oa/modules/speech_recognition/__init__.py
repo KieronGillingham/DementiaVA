@@ -34,6 +34,7 @@ def _in(ctx):
 
     while not ctx.finished.is_set():
         raw_data = get()
+
         if isinstance(raw_data, str):
             if raw_data == 'mute':
                 _logger.debug('Muted')
@@ -49,31 +50,31 @@ def _in(ctx):
 
         # Mute mode. Do not listen until unmute.
         if mute:
-            continue
+           continue
 
         # Obtain audio data.
         try:
-            for frame in raw_data:
-                if stream_context is None:
-                    stream_context = model.createStream()
-                if frame is not None:
-                    try:
-                        stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
-                    except RuntimeError:
-                        stream_context = model.createStream()
+            if stream_context is None:
+                stream_context = model.createStream()
+            if raw_data is not None:
+                try:
+                    stream_context.feedAudioContent(np.frombuffer(raw_data, np.int16))
+                except RuntimeError as ex:
+                    _logger.error(ex)
+                    continue
+            else:
+
+                text = stream_context.finishStream()
+                stream_context = None
+
+                if text is not None:
+                    if (text is None) or (text.strip() == ''):
+                        _logger.info('No speech detected')
                         continue
+                    _logger.info(f'Heard: "{text.upper()}"')
+                    yield text
                 else:
-
-                    text = stream_context.finishStream()
-
-                    if text is not None:
-                        if (text is None) or (text.strip() == ''):
-                            _logger.info('No speech detected')
-                            continue
-                        _logger.info(f'Heard: "{text.upper()}"')
-                        yield text
-                    else:
-                        _logger.warning('Speech not recognized')
+                    _logger.warning('Speech not recognized')
 
 
         except Exception as e:

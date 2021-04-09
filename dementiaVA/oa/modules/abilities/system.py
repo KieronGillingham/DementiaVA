@@ -8,20 +8,12 @@ import oa.legacy
 
 from oa.modules.abilities.core import info
 
-# def download_file(url, path):
-#     """ Download a file by url and save it to a local path. """
-#     r = requests.get(url, stream = True)
-#     if r.status_code == 200:
-#         with open(path, 'wb') as f:
-#             for chunk in r:
-#                 f.write(chunk)
-
 def find_file(fname):
     """ Search for a file with `fname` in all OA sub-directories.
         Able to use a short name if it is unique.
         NEED FIX - Put file names into Cache list ? """
     core_directory = oa.legacy.core_directory
-    ret = glob.glob(os.path.join(core_directory,'modules/mind/minds/*/%s' %fname))
+    ret = glob.glob(os.path.join(core_directory, fname), recursive=False)
     if not ret:
         ret = glob.glob(os.path.join(core_directory,'modules/mind/minds/*/*/%s' %fname))
     if len(ret) != 1:
