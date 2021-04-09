@@ -22,12 +22,12 @@ def _in(ctx):
     # Start audio with VAD (Voice Detection)
     vad_audio = VADAudio()
 
-    collector = vad_audio.vad_collector()
+    collector = vad_audio.vad_collector(ctx=ctx)
 
     while not ctx.finished.is_set():
         for frame in collector:
             yield frame
-        collector = vad_audio.vad_collector()
+        collector = vad_audio.vad_collector(ctx=ctx)
 
 class Audio(object):
     """Streams raw audio from microphone. Data is received in a separate thread, and stored in a buffer, to be read from."""
@@ -109,22 +109,26 @@ class VADAudio(Audio):
         super().__init__(device=device, input_rate=input_rate, file=file)
         self.vad = webrtcvad.Vad(aggressiveness)
 
-    def frame_generator(self):
+    def frame_generator(self, context=None):
         """Generator that yields all audio frames from microphone."""
+        if context is None:
+            raise RuntimeError("Context for loop missing")
+            return
         if self.input_rate == self.RATE_PROCESS:
-            while True:
+            while not context.finished.is_set():
                 yield self.read()
         else:
-            while True:
+            while not context.finished.is_set():
                 yield self.read_resampled()
 
-    def vad_collector(self, padding_ms=1000, ratio=0.25, frames=None):
+    def vad_collector(self, padding_ms=1000, ratio=0.25, frames=None, ctx=None):
         """Generator that yields series of consecutive audio frames comprising each utterence, separated by yielding a single None.
             Determines voice activity by ratio of frames in padding_ms. Uses a buffer to include padding_ms prior to being triggered.
             Example: (frame, ..., frame, None, frame, ..., frame, None, ...)
                       |---utterence---|        |---utterence---|
         """
-        if frames is None: frames = self.frame_generator()
+        if frames is None:
+            frames = self.frame_generator(context=ctx)
         num_padding_frames = padding_ms // self.frame_duration_ms
         ring_buffer = collections.deque(maxlen=num_padding_frames)
         triggered = False

@@ -82,3 +82,5 @@ def thread_loop(hub, part, b):
         except Exception as ex:
             _logger.error("Error processing queue: {}".format(ex))
     _logger.debug('Ending loop for {}'.format(part.name))
+
+    exit()
