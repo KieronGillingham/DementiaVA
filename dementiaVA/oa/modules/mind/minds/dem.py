@@ -66,16 +66,20 @@ def radio_no():
     say('Okay, I won\'t put any music on.')
 
 
-@command("what day is it")
+@command(["day", "date"])
 def what_day():
     say_day()
 
 
-@command("what did I say")
+@command(["what did I say", "repeat"])
 def what_command():
     say_last_command('You just said:')
 
 
-@command("what time is it")
+@command("time")
 def what_time():
     say_time()
+
+@command(["your name", "who"])
+def your_name():
+    say("My name is GLAD.")

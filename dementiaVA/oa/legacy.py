@@ -146,5 +146,5 @@ sys.month = lambda : sys.now().month
 sys.month_name = lambda : sys.now().strftime("%B")
 sys.year = lambda : sys.now().year
 sys.date_text = lambda : '%d %s %d' %(sys.day(), sys.month_name(), sys.year())
-sys.time_text = lambda : '%d:%d' %(sys.hour(), sys.minute())
+sys.time_text = lambda : '%d %d' %(sys.hour(), sys.minute())
 sys.date_time_text = lambda : sys.date_text() + ' ' + sys.time_text()

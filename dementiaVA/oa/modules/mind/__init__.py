@@ -71,6 +71,7 @@ def _in(ctx):
 
     default_mind = 'dem'
     load_minds()
+    oa.legacy.oa.last_command = None
     set_mind(default_mind)
     _logger.info(f'"{default_mind}" is now listening.')
 
@@ -92,8 +93,7 @@ def _in(ctx):
             empty('ear')
             if oa.legacy.isCallable(fn):
                 call_function(fn)
-                # Keep note of most recent command
-                oa.legacy.oa.last_command = t
+
         elif t is not None:
             # If function is none, than pass the text to interact
             oa.modules.abilities.interact.answer(text)
@@ -102,3 +102,5 @@ def _in(ctx):
             _logger.debug(f"'{text}' was not processed.")
         yield text
 
+        # Keep note of most recent command
+        oa.legacy.oa.last_command = text
