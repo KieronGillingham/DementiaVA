@@ -3,6 +3,8 @@ import oa.legacy
 from oa.modules.abilities.core import call_function, put
 from oa.modules.abilities.system import find_file
 
+from statistics import mode
+
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -56,31 +58,51 @@ def answer(text):
 def match_intent(text, options=None):
     """Given an input text, match it to either a function in the current mind, or one of a dict of options."""
     if options is None:
-        # Use kws of current mind as options
+        # Use keywords of current mind as options
         options = oa.legacy.mind.kws
 
-    keywords = []
+    # Functions matched to text
+    matched_functions = []
     for keyword in options:
-        if text.find(keyword) != -1:
+        # If a keyword is identified in the given text
+        if _find(keyword, text) != -1:
+            # Get the function associated with the keyword
             func = options[keyword]
-            keywords.append([func, keyword])
+            # Add it to the list of matched functions
+            matched_functions.append([func, keyword])
 
-    if (len(keywords) > 1):
-        from statistics import mode
-        fn = mode(keywords[:][0])
-        _logger.debug(f'Identified keywords: {keywords}')
-    elif (len(keywords) == 1):
-        fn = keywords[0][0]
-        _logger.debug(f'Identified keyword: {keywords}')
-    else:
+    if not matched_functions:
+        # No function identified
         fn = None
-        _logger.debug(f'No keywords identified.')
+        _logger.debug(f'Processing "{text}": No keywords found')
+    else:
+        # If one or more functions matched, select most common
+        fn = mode(matched_functions[:][0])
+        _logger.debug(f'Processing "{text}": Identified keywords: {[f[1] for f in matched_functions]}')
+
     return fn
+
+def _find(keyword, text):
+    structure = keyword.split('+')
+    if len(structure) == 1:
+        return text.find(keyword)
+    else:
+        start = 0
+        for part in structure:
+            start = text.find(part, start)
+            if start == -1:
+                break
+        return start
 
 def yes_no(msg, yes, no):
     """ Receive a yes or no answer from the user. """
     say(msg)
-    user_answer({'yes': yes, 'no': no})
+    choices = {}
+    for k in ['yes', 'yeah', 'yah', 'yea', 'sure', 'okay']:
+        choices[k] = yes
+    for k in ['no', 'nope', 'nah', 'don\'t']:
+        choices[k] = no
+    user_answer(choices)
 
 
 def say(text):

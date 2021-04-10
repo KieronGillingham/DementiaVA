@@ -20,18 +20,17 @@ def start():
         say('Hello, I am GLAD. How can I help?')
         oa.legacy.mind.mute_message = True
 
-
-@command(["can you", "you can do", "what you", "do", "help"])
+@command(["can you", "you can+do", "what+can+you", "help"])
 def what_do():
     say('At the moment, I can play a simple number game with you, or put some music on.')
 
 
-@command(["demo", "intro", "hello", "start"])
+@command(["hello", "glad"])
 def run_demo():
     say('Hello! How can I help?')
 
 
-@command(["close", "stop", "end", "off", "sleep"])
+@command(["close", "stop", "end", "off", "sleep", "go+sleep", "turn of", "switch of", "shut+down"])
 def close_assistant():
     oa.legacy.hub.finished.set()
     say('Shutting down.')
@@ -47,12 +46,12 @@ def numbergame_no():
     say('Okay, we won\'t play.')
 
 
-@command(["number", "game"])
+@command(["number", "game", "high+low", "low+high"])
 def number_game():
     yes_no('Do you want to play the number game?', numbergame_yes, numbergame_no)
 
 
-@command(["radio", "music"])
+@command(["radio", "music", "sound", "too quiet"])
 def radio():
     yes_no('Do you want to listen to the radio?', radio_yes, radio_no)
 
@@ -80,6 +79,6 @@ def what_command():
 def what_time():
     say_time()
 
-@command(["your name", "who"])
+@command(["your name", "who+you"])
 def your_name():
     say("My name is GLAD.")
