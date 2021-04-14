@@ -89,8 +89,7 @@ def _in(ctx):
 
         # If a function is identified, call it
         if fn is not None:
-            empty('speech_recognition')
-            empty('ear')
+            oa.legacy.mind.choices = None # Clear any outstanding choices
             if oa.legacy.isCallable(fn):
                 call_function(fn)
 
