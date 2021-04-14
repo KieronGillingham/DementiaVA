@@ -6,19 +6,20 @@ from oa.modules.abilities.system import find_file
 from statistics import mode
 
 import logging
+import time
 _logger = logging.getLogger(__name__)
 
+
 def user_answer(choices):
-    """ Set the possible user choices as a dict:
-    {'SPOKEN PHRASE': function_to_call, ...}
-    """
+    """ Set the possible user choices as a dict: {'SPOKEN PHRASE': function_to_call, ...} """
     # mind(mind_for_answer, 0) # No history.
     try:
         oa.legacy.mind.user_choices = choices
         _logger.debug(f"Setting choices: {choices}")
     except Exception as ex:
-        # _logger.debug(f'{oa.legacy.mind} does not accept user choices')
+        _logger.error(f'{oa.legacy.mind} does not accept user choices')
         return
+
 
 def answer(text):
     """ Process an unknown user response and compare it to the current choices in the mind. """
@@ -46,13 +47,13 @@ def answer(text):
     # If a function is found, clear the choices dict and run the function
     if func:
         oa.legacy.mind.user_choices = None
-        _logger.debug("Clearing choices")
+        _logger.debug(f"{func} selected; clearing choices")
         call_function(func)
     else:
         # If a function isn't found, alert the user.
         say('Sorry, I didn\'t get that.')
 
-    #oa.legacy.mind.switch_back()
+    # oa.legacy.mind.switch_back()
 
 
 def match_intent(text, options=None):
@@ -82,6 +83,7 @@ def match_intent(text, options=None):
 
     return fn
 
+
 def _find(keyword, text):
     structure = keyword.split('+')
     if len(structure) == 1:
@@ -94,11 +96,12 @@ def _find(keyword, text):
                 break
         return start
 
+
 def yes_no(msg, yes, no):
     """ Receive a yes or no answer from the user. """
     say(msg)
     choices = {}
-    for k in ['yes', 'yeah', 'yah', 'yea', 'sure', 'okay']:
+    for k in ['yes', 'yeah', 'yah', 'yea', 'sure', 'shore', 'okay']:
         choices[k] = yes
     for k in ['no', 'nope', 'nah', 'don\'t']:
         choices[k] = no
@@ -107,12 +110,10 @@ def yes_no(msg, yes, no):
 
 def say(text):
     """ Text to speech using the `oa.audio.say` defined function. """
-    # TODO: Remove
-    text = call_function(text)
-    oa.legacy.sys.last_say = text
-
     if text is not None:
         # Put message into voice.
+        oa.legacy.sys.last_say = text
+        oa.legacy.sys.last_say_time = time.time()
         put('voice', text)
 
 
@@ -122,6 +123,6 @@ def play(fname, description='Sound Effect'):
     put('sound', find_file(fname))
 
 
-def mind(name, history = 1):
+def mind(name, history=1):
     """ Switch the current mind to `name`. """
     oa.legacy.hub.parts['mind'].set_mind(name, history)
