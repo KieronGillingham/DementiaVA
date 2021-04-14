@@ -1,4 +1,4 @@
-from time import sleep
+from time import sleep, time
 
 from oa.core.util import command_registry
 
@@ -6,6 +6,7 @@ from oa.modules.abilities.interact import say, play, mind, yes_no, user_answer
 from oa.modules.abilities.other import say_day, say_last_command, say_time
 
 import oa
+
 
 kws = {}
 
@@ -25,7 +26,7 @@ def what_do():
     say('At the moment, I can play a simple number game with you, or put some music on.')
 
 
-@command(["hello", "glad"])
+@command(["hello"])
 def run_demo():
     say('Hello! How can I help?')
 
@@ -79,6 +80,14 @@ def what_command():
 def what_time():
     say_time()
 
+
 @command(["your name", "who+you"])
 def your_name():
     say("My name is GLAD.")
+
+
+@command(["thank"])
+def thanks():
+    time_since_last_reply = time() - oa.legacy.sys.last_say_time
+    if time_since_last_reply < 10:
+        say("You're welcome.")
