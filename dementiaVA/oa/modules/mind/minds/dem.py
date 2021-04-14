@@ -4,6 +4,7 @@ from oa.core.util import command_registry
 
 from oa.modules.abilities.interact import say, play, mind, yes_no, user_answer
 from oa.modules.abilities.other import say_day, say_last_command, say_time
+from oa.modules.abilities.core import set_config, adjust_config
 
 import oa
 
@@ -20,6 +21,7 @@ def start():
         sleep(2)
         say('Hello, I am GLAD. How can I help?')
         oa.legacy.mind.mute_message = True
+
 
 @command(["can you", "you can+do", "what+can+you", "help"])
 def what_do():
@@ -91,3 +93,24 @@ def thanks():
     time_since_last_reply = time() - oa.legacy.sys.last_say_time
     if time_since_last_reply < 10:
         say("You're welcome.")
+
+@command(["configure", "settings", "options"])
+def settings():
+    say("You can change my talking speed, or set me to monitoring mode.")
+
+
+@command(["how+change+talk"])
+def how_change_talk():
+    say("Just tell me to talk faster or slower.")
+
+
+@command(["talk+faster", "talk+too slow"])
+def talk_faster():
+    say("I'll talk faster from now on.")
+    adjust_config("talkspeed", 25)
+
+
+@command(["talk+slower", "talk+too fast", "slow down"])
+def talk_slower():
+    say("I'll talk slower from now on.")
+    adjust_config("talkspeed", -25)

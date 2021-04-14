@@ -5,6 +5,7 @@ import threading
 
 import oa.legacy
 
+import json
 
 """ CORE FUNCTIONS """
 
@@ -79,3 +80,19 @@ def empty(part=None):
             part.wire_in.get(False)
     except Exception as ex:
         _logger.error(f"Wire in to part {part} could not be emptied: {ex}")
+
+
+def set_config(setting, new_value):
+    oa.legacy.hub.config[setting] = new_value
+    export_config()
+
+
+def adjust_config(setting, adjustment):
+    oa.legacy.hub.config[setting] += adjustment
+    export_config()
+
+
+def export_config():
+    with open("config.json", "w") as conf:
+        json.dump(oa.legacy.hub.config, conf)
+        conf.close()

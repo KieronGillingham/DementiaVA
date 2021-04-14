@@ -20,7 +20,6 @@ else:
 def _in(ctx):
     if not flMac:
         tts = pyttsx3.init()
-        tts.setProperty('rate', 100)
 
     while not ctx.finished.is_set():
         s = get()
@@ -30,6 +29,8 @@ def _in(ctx):
         # Pause Ear (listening) while talking. Mute TTS.
         # TODO: move this somewhere else
         # put('speech_recognition', 'mute')
+
+        tts.setProperty('rate', ctx.config["talkspeed"])
 
         if flMac:
             _msg = subprocess.Popen(['echo', s], stdout=subprocess.PIPE)
