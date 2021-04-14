@@ -27,7 +27,7 @@ class Game:
         self.current_number = get_random_number()
 
         say(f"The next number is {self.current_number}.\nIs that higher, lower, or the same?")
-        user_answer({'higher': self.higher, 'lower': self.lower, 'same': self.same})
+        user_answer(self.get_choices())
 
     def higher(self):
         # Call end of round method with True if number is higher
@@ -61,15 +61,18 @@ class Game:
     def end_game(self):
         say(f"Okay. Let's stop. You scored {self.score} correct in {self.round - 1} rounds. Thanks for playing.")
 
+
+    def get_choices(self):
+        choices = {}
+        for response in ("higher", "hire", "high", "up", "bigger", "larger", "more", "above"):
+            choices[response] = self.higher
+        for response in ("lower", "low", "down", "smaller", "less", "below"):
+            choices[response] = self.lower
+        for response in ("same", "equal"):
+            choices[response] = self.same
+        return choices
+
 def get_random_number():
     return random.randrange(1, 100)
 
-def get_response(response):
-    response = None
-    if response in ("higher", "hire", "high", "up", "bigger", "larger", "more"):
-        response = "higher"
-    elif response in ("lower", "low", "down", "smaller", "less"):
-        response = "lower"
-    elif response in ("same", "equal"):
-        response = "equal"
-    return response
+
