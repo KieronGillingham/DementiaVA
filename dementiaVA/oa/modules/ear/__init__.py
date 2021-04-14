@@ -14,7 +14,8 @@ import wave
 import webrtcvad
 from halo import Halo
 from scipy import signal
-from oa.modules.abilities.core import put
+from oa.modules.abilities.core import put, get
+import oa
 
 _logger = logging.getLogger(__name__)
 
@@ -105,7 +106,7 @@ class Audio(object):
 class VADAudio(Audio):
     """Filter & segment audio with voice activity detection."""
 
-    def __init__(self, aggressiveness=1, device=None, input_rate=16000, file=None):
+    def __init__(self, aggressiveness=3, device=None, input_rate=16000, file=None):
         super().__init__(device=device, input_rate=input_rate, file=file)
         self.vad = webrtcvad.Vad(aggressiveness)
 
@@ -139,7 +140,6 @@ class VADAudio(Audio):
 
             # Determine if audio input is loud enough to count as speech
             is_speech = self.vad.is_speech(frame, self.sample_rate)
-
             # If audio is not currently being streamed out
             if not triggered:
                 # Save frame to buffer
@@ -153,11 +153,14 @@ class VADAudio(Audio):
                     _logger.debug("Utterance detected")
 
                     for f, s in ring_buffer:
+                        # _logger.debug(f"Buffer: {f}")
                         yield f
                     ring_buffer.clear()
 
             else:
                 yield frame
+                # _logger.debug(frame)
+
                 ring_buffer.append((frame, is_speech))
                 num_unvoiced = len([f for f, speech in ring_buffer if not speech])
                 if num_unvoiced > ratio * ring_buffer.maxlen:
