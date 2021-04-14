@@ -60,15 +60,22 @@ def put(part, value):
     """ Put a message on the wire. """
     oa.legacy.hub.parts[part].wire_in.put(value)
 
-def empty(part = None):
-    """ Remove all messages from `part.wire_in` input queue.
-        (No parameters. Thread safe) """
+
+def empty(part=None):
+    """ Remove all messages from `part.wire_in` input queue. """
+    # If no argument is given, set part to the current part
     if part is None:
         part = current_part()
-    if isinstance(part, str):
-        part = oa.legacy.hub.parts[part]
+
+    # Search for a part with a name that matches the given string
+    elif isinstance(part, str):
+        partname = part
+        part = oa.legacy.hub.parts[partname]
+        if part is None:
+            raise Exception(f"Part '{partname}' could not be found")
     try:
-        while True:
+        # Loop over the queue, discarding each item from it until it is empty.
+        while not part.wire_in.empty():
             part.wire_in.get(False)
-    except oa.legacy.queue.Empty:
-        pass
+    except Exception as ex:
+        _logger.error(f"Wire in to part {part} could not be emptied: {ex}")
