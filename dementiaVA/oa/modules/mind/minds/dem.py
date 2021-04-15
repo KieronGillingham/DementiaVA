@@ -110,7 +110,7 @@ def talk_faster():
     adjust_config("talkspeed", 25)
 
 
-@command(["talk+slower", "talk+too fast", "slow down"])
+@command(["talk+slower", "talk+too fast", "slow down", "talk+lower"])
 def talk_slower():
     say("I'll talk slower from now on.")
     adjust_config("talkspeed", -25)
