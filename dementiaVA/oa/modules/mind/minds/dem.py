@@ -1,3 +1,5 @@
+import logging
+
 from time import sleep, time
 
 from oa.core.util import command_registry
@@ -8,6 +10,7 @@ from oa.modules.abilities.core import set_config, adjust_config
 
 import oa
 
+_logger = logging.getLogger(__name__)
 
 kws = {}
 
@@ -29,43 +32,32 @@ def what_do():
 
 
 @command(["hello"])
-def run_demo():
+def hello():
     say('Hello! How can I help?')
 
 
 @command(["close", "stop", "end", "off", "sleep", "go+sleep", "turn of", "switch of", "shut+down"])
-def close_assistant():
-    oa.legacy.hub.finished.set()
-    say('Shutting down.')
-    play('sleep.wav', "Shut-down Jingle")
-
-
-def numbergame_yes():
-    say('Okay let\'s play.')
-    mind('numbergame')
-
-
-def numbergame_no():
-    say('Okay, we won\'t play.')
+def stop_assistant():
+    def yes():
+        oa.legacy.hub.finished.set()
+        say('Shutting down.')
+        play('sleep.wav', "Shut-down Jingle")
+    def no(): say('Okay I\'ll stay awake.')
+    yes_no('Should I turn off?', yes, no)
 
 
 @command(["number", "game", "high+low", "low+high"])
 def number_game():
-    yes_no('Do you want to play the number game?', numbergame_yes, numbergame_no)
+    def yes(): say('Okay let\'s play.') & mind('numbergame')
+    def no(): say('Okay we won\'t play.')
+    yes_no('Do you want to play the number game?', yes, no)
 
 
 @command(["radio", "music", "sound", "too quiet"])
 def radio():
-    yes_no('Do you want to listen to the radio?', radio_yes, radio_no)
-
-
-def radio_yes():
-    say('I\'ll play the radio for you then.')
-    mind('radio')
-
-
-def radio_no():
-    say('Okay, I won\'t put any music on.')
+    def yes(): say('I\'ll play the radio for you then.') & mind('radio')
+    def no(): say('Okay, I won\'t put any music on.')
+    yes_no('Do you want to listen to the radio?', yes, no)
 
 
 @command(["day", "date"])
@@ -89,12 +81,15 @@ def your_name():
 
 
 @command(["thank"])
-def thanks():
+def be_thanked():
     time_since_last_reply = time() - oa.legacy.sys.last_say_time
     if time_since_last_reply < 10:
         say("You're welcome.")
+    else:
+        _logger.debug("No reason to be thanked")
 
-@command(["configure", "settings", "options"])
+
+@command(["configure", "setting", "change+setting", "options"])
 def settings():
     say("You can change my talking speed, or set me to monitoring mode.")
 
