@@ -1,47 +1,20 @@
-# voice.py - Audio output: Text To Speech (TTS)
-
-import logging
-_logger = logging.getLogger(__name__)
-
 import pyttsx3
+import logging
 
-from oa.modules.abilities.core import get, put
+from oa.modules.abilities.core import get
 
-
-import platform
-sys_os = platform.system()
-flMac = (sys_os == 'Darwin')
-if flMac:
-    import subprocess
-else:
-    import pyttsx3
+_logger = logging.getLogger(__name__)
 
 
 def _in(ctx):
-    if not flMac:
-        tts = pyttsx3.init()
+    tts = pyttsx3.init()
 
     while not ctx.finished.is_set():
         s = get()
-        _logger.debug(f'Speaking: {s}')
-        print(f'Speaking: {s}')
-
-        # Pause Ear (listening) while talking. Mute TTS.
-        # TODO: move this somewhere else
-        # put('speech_recognition', 'mute')
 
         tts.setProperty('rate', ctx.config["talkspeed"])
 
-        if flMac:
-            _msg = subprocess.Popen(['echo', s], stdout=subprocess.PIPE)
-            _tts = subprocess.Popen(['say'], stdin=_msg.stdout)
-            _msg.stdout.close()
-            _tts.communicate()
-        else:
-            tts.say(s)
-            tts.runAndWait()
-
-        # Wait until speaking ends.
-        # Continue ear (listening). Unmute TTS.
-        # TODO: move this somewhere else
-        # put('speech_recognition', 'unmute')
+        _logger.debug(f'Speaking: {s}')
+        print(f'Speaking: {s}')
+        tts.say(s)
+        tts.runAndWait()
