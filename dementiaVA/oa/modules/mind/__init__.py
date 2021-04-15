@@ -18,13 +18,8 @@ def load_mind(path):
     mind = oa.legacy.Core()
     mind.module = path
     mind.name = os.path.splitext(os.path.basename(mind.module))[0]
-    mind.cache_dir = os.path.join(oa.legacy.core_directory, 'cache', mind.name)
 
     _logger.debug("Loading {} mind".format(mind.name))
-
-    # Make directories.
-    if not os.path.exists(mind.cache_dir):
-        os.makedirs(mind.cache_dir)
 
     M = importlib.import_module("oa.modules.mind.minds"+".{}".format(mind.name))
     mind.__dict__.update(M.__dict__)
