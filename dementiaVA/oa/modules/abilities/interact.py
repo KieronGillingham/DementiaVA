@@ -51,7 +51,7 @@ def answer(text):
         call_function(func)
     else:
         # If a function isn't found, alert the user.
-        say('Sorry, I didn\'t get that.')
+        say('Could you repeat that.')
 
     # oa.legacy.mind.switch_back()
 

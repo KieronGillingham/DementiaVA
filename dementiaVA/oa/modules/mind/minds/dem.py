@@ -43,19 +43,23 @@ def stop_assistant():
         say('Shutting down.')
         play('sleep.wav', "Shut-down Jingle")
     def no(): say('Okay I\'ll stay awake.')
-    yes_no('Should I turn off?', yes, no)
+    yes_no('Should I go to sleep?', yes, no)
 
 
 @command(["number", "game", "high+low", "low+high"])
 def number_game():
-    def yes(): say('Okay let\'s play.') & mind('numbergame')
+    def yes():
+        say('Okay let\'s play.')
+        mind('numbergame')
     def no(): say('Okay we won\'t play.')
     yes_no('Do you want to play the number game?', yes, no)
 
 
 @command(["radio", "music", "sound", "too quiet"])
 def radio():
-    def yes(): say('I\'ll play the radio for you then.') & mind('radio')
+    def yes():
+        say('I\'ll play the radio for you then.')
+        mind('radio')
     def no(): say('Okay, I won\'t put any music on.')
     yes_no('Do you want to listen to the radio?', yes, no)
 
