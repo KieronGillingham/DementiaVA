@@ -1,23 +1,8 @@
 import oa.legacy
 
 from oa.modules.abilities.core import info, put
-from oa.modules.abilities.interact import say
 from oa.modules.abilities.system import find_file, sys_exec
 
-def activate(s):
-    """ Activate a specific window. """
-    if oa.legacy.sys.os == 'win':
-        w = WindowMgr()
-        w.find_window_wildcard('.*' + s + '.*')
-        w.set_foreground()
-    else:
-        raise Exception('`Activate` is unsupported.')
-
-def close(s):
-    """ Close an application by a window or process name.
-        A partial window name will work, for example: 'note*'. """
-    say('- Unable to close %s for now.' %s)
-    pass
 
 def volume(move = 2):
     """ Change volume level.

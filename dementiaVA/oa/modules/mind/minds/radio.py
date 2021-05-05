@@ -21,21 +21,22 @@ player = None
 def _get_player():
     if not oa.legacy.mind.player:
         _logger.debug('Loading media player')
-        player = vlc.MediaPlayer(get_station())
-        oa.legacy.mind.player = player
+        station = get_station()
+        print(station)
+        oa.legacy.mind.player = vlc.MediaPlayer(station)
     return oa.legacy.mind.player
 
 
 @command(["change", "song", "next", "station", "different"])
 def change_station():
-    print(' + Changing Station +')
+    print('+ Changing Station +')
     oa.legacy.mind.player.stop()
     oa.legacy.mind.player.release()
-
-    player = vlc.MediaPlayer(get_station())
-    oa.legacy.mind.player = player
+    oa.legacy.mind.player = None
+    player = _get_player()
     player.play()
-
+    player.audio_set_volume(50)
+    oa.legacy.mind.player = player
 def get_station():
     stations = [
         'http://s2.radio.co/s07cd038f1/listen',
@@ -67,10 +68,10 @@ def volume_down():
     player = _get_player()
     new_volume = player.audio_get_volume() - 25
     if new_volume <= 0:
-        print(f' + Lowering volume to 0 and stopping +')
+        print(f'+ Lowering volume to 0 and stopping +')
         stop()
     else:
-        print(f' + Lowering volume to {new_volume} +')
+        print(f'+ Lowering volume to {new_volume} +')
         player.audio_set_volume(new_volume)
 
 
@@ -88,8 +89,11 @@ def volume_up():
 
 
 def start():
-    player = _get_player()
-    player.play()
-    if player.audio_get_volume() <= 50:
-        player.audio_set_volume(50)
-    print(' + Playing Radio +')
+    try:
+        player = _get_player()
+        player.play()
+        if player.audio_get_volume() <= 50:
+            player.audio_set_volume(50)
+        print('+ Playing Radio +')
+    except Exception as ex:
+        _logger.error(ex)

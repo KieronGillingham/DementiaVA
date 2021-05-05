@@ -14,7 +14,8 @@ import wave
 import webrtcvad
 from halo import Halo
 from scipy import signal
-from oa.modules.abilities.core import put
+from oa.modules.abilities.core import put, get
+import oa
 
 _logger = logging.getLogger(__name__)
 
@@ -22,12 +23,12 @@ def _in(ctx):
     # Start audio with VAD (Voice Detection)
     vad_audio = VADAudio()
 
-    collector = vad_audio.vad_collector()
+    collector = vad_audio.vad_collector(ctx=ctx)
 
     while not ctx.finished.is_set():
         for frame in collector:
             yield frame
-        collector = vad_audio.vad_collector()
+        collector = vad_audio.vad_collector(ctx=ctx)
 
 class Audio(object):
     """Streams raw audio from microphone. Data is received in a separate thread, and stored in a buffer, to be read from."""
@@ -105,26 +106,30 @@ class Audio(object):
 class VADAudio(Audio):
     """Filter & segment audio with voice activity detection."""
 
-    def __init__(self, aggressiveness=1, device=None, input_rate=16000, file=None):
+    def __init__(self, aggressiveness=3, device=None, input_rate=16000, file=None):
         super().__init__(device=device, input_rate=input_rate, file=file)
         self.vad = webrtcvad.Vad(aggressiveness)
 
-    def frame_generator(self):
+    def frame_generator(self, context=None):
         """Generator that yields all audio frames from microphone."""
+        if context is None:
+            raise RuntimeError("Context for loop missing")
+            return
         if self.input_rate == self.RATE_PROCESS:
-            while True:
+            while not context.finished.is_set():
                 yield self.read()
         else:
-            while True:
+            while not context.finished.is_set():
                 yield self.read_resampled()
 
-    def vad_collector(self, padding_ms=1000, ratio=0.25, frames=None):
+    def vad_collector(self, padding_ms=1000, ratio=0.25, frames=None, ctx=None):
         """Generator that yields series of consecutive audio frames comprising each utterence, separated by yielding a single None.
             Determines voice activity by ratio of frames in padding_ms. Uses a buffer to include padding_ms prior to being triggered.
             Example: (frame, ..., frame, None, frame, ..., frame, None, ...)
                       |---utterence---|        |---utterence---|
         """
-        if frames is None: frames = self.frame_generator()
+        if frames is None:
+            frames = self.frame_generator(context=ctx)
         num_padding_frames = padding_ms // self.frame_duration_ms
         ring_buffer = collections.deque(maxlen=num_padding_frames)
         triggered = False
@@ -135,7 +140,6 @@ class VADAudio(Audio):
 
             # Determine if audio input is loud enough to count as speech
             is_speech = self.vad.is_speech(frame, self.sample_rate)
-
             # If audio is not currently being streamed out
             if not triggered:
                 # Save frame to buffer
@@ -149,11 +153,14 @@ class VADAudio(Audio):
                     _logger.debug("Utterance detected")
 
                     for f, s in ring_buffer:
+                        # _logger.debug(f"Buffer: {f}")
                         yield f
                     ring_buffer.clear()
 
             else:
                 yield frame
+                # _logger.debug(frame)
+
                 ring_buffer.append((frame, is_speech))
                 num_unvoiced = len([f for f, speech in ring_buffer if not speech])
                 if num_unvoiced > ratio * ring_buffer.maxlen:

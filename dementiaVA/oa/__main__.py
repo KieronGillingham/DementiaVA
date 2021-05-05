@@ -41,7 +41,7 @@ if __name__ == '__main__':
     args = _parser(sys.argv[1:])
 
     log_template = "[%(asctime)s] %(levelname)s %(threadName)s %(name)s: %(message)s"
-    logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG, filename=args.log_file, format=log_template)
+    logging.basicConfig(level=logging.WARNING if not args.debug else logging.DEBUG, filename=args.log_file, format=log_template)
 
     _logger.info("Start Open Assistant")
 

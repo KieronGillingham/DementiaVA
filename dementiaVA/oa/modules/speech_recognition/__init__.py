@@ -9,6 +9,7 @@ import numpy as np
 
 from oa.modules.abilities.core import get, empty, info
 
+
 def get_model(ctx):
     _logger.info('Initializing speech recognition model')
     try:
@@ -23,6 +24,7 @@ def get_model(ctx):
         _logger.error('Speech recognition model/scorer failed to load - {}'.format(ex))
         model = None
     return model
+
 
 def _in(ctx):
     mute = 0
@@ -66,16 +68,16 @@ def _in(ctx):
 
                 text = stream_context.finishStream()
                 stream_context = None
+                empty()
 
                 if text is not None:
                     if (text is None) or (text.strip() == ''):
-                        _logger.info('No speech detected')
+                        _logger.debug('No speech detected')
                         continue
-                    _logger.info(f'Heard: "{text.upper()}"')
+                    _logger.debug(f'Heard: "{text.upper()}"')
                     yield text
                 else:
                     _logger.warning('Speech not recognized')
-
 
         except Exception as e:
             _logger.error(e)

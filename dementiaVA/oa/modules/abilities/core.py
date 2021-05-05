@@ -5,6 +5,7 @@ import threading
 
 import oa.legacy
 
+import json
 
 """ CORE FUNCTIONS """
 
@@ -60,20 +61,38 @@ def put(part, value):
     """ Put a message on the wire. """
     oa.legacy.hub.parts[part].wire_in.put(value)
 
-def empty(part = None):
-    """ Remove all messages from `part.wire_in` input queue.
-        (No parameters. Thread safe) """
+
+def empty(part=None):
+    """ Remove all messages from `part.wire_in` input queue. """
+    # If no argument is given, set part to the current part
     if part is None:
         part = current_part()
+
+    # Search for a part with a name that matches the given string
+    elif isinstance(part, str):
+        partname = part
+        part = oa.legacy.hub.parts[partname]
+        if part is None:
+            raise Exception(f"Part '{partname}' could not be found")
     try:
-        while True:
+        # Loop over the queue, discarding each item from it until it is empty.
+        while not part.wire_in.empty():
             part.wire_in.get(False)
-    except oa.legacy.queue.Empty:
-        pass
+    except Exception as ex:
+        _logger.error(f"Wire in to part {part} could not be emptied: {ex}")
 
-def quit_app():
-    quit(0)
 
-def close():
-    """ Close Open Assistant. """
-    quit()
+def set_config(setting, new_value):
+    oa.legacy.hub.config[setting] = new_value
+    export_config()
+
+
+def adjust_config(setting, adjustment):
+    oa.legacy.hub.config[setting] += adjustment
+    export_config()
+
+
+def export_config():
+    with open("config.json", "w") as conf:
+        json.dump(oa.legacy.hub.config, conf)
+        conf.close()

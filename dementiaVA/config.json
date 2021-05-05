@@ -1,5 +1,1 @@
-{
-  "deepspeech_model" : "/home/glad/deepspeech-0.9.3-models.pbmm",
-  "deepspeech_scorer" : "/home/glad/deepspeech-0.9.3-models.scorer"
-}
-
+{"module_path": ["/home/glad/DementiaVA/dementiaVA/oa/modules"], "modules": ["voice", "sound", "ear", "speech_recognition", "mind"], "deepspeech_model": "/home/glad/deepspeech-0.9.3-models.pbmm", "deepspeech_scorer": "/home/glad/deepspeech-0.9.3-models.scorer", "talkspeed": 100}

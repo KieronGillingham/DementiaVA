@@ -7,9 +7,7 @@ import os
 
 import oa.legacy
 
-from oa.modules.abilities.core import info, call_function, get
-from oa.modules.abilities.system import read_file, sys_exec
-
+from oa.modules.abilities.core import info, call_function, get, empty
 
 """ Core mind functions. """
 
@@ -20,13 +18,8 @@ def load_mind(path):
     mind = oa.legacy.Core()
     mind.module = path
     mind.name = os.path.splitext(os.path.basename(mind.module))[0]
-    mind.cache_dir = os.path.join(oa.legacy.core_directory, 'cache', mind.name)
 
     _logger.debug("Loading {} mind".format(mind.name))
-
-    # Make directories.
-    if not os.path.exists(mind.cache_dir):
-        os.makedirs(mind.cache_dir)
 
     M = importlib.import_module("oa.modules.mind.minds"+".{}".format(mind.name))
     mind.__dict__.update(M.__dict__)
@@ -73,6 +66,7 @@ def _in(ctx):
 
     default_mind = 'dem'
     load_minds()
+    oa.legacy.oa.last_command = None
     set_mind(default_mind)
     _logger.info(f'"{default_mind}" is now listening.')
 
@@ -81,6 +75,7 @@ def _in(ctx):
         if (text is None) or (text.strip() == ''):
             # Nothing to do
             continue
+
         t = text.upper()
 
         # Check for a matching command
@@ -89,10 +84,10 @@ def _in(ctx):
 
         # If a function is identified, call it
         if fn is not None:
+            oa.legacy.mind.choices = None # Clear any outstanding choices
             if oa.legacy.isCallable(fn):
                 call_function(fn)
-                # Keep note of most recent command
-                oa.legacy.oa.last_command = t
+
         elif t is not None:
             # If function is none, than pass the text to interact
             oa.modules.abilities.interact.answer(text)
@@ -101,3 +96,5 @@ def _in(ctx):
             _logger.debug(f"'{text}' was not processed.")
         yield text
 
+        # Keep note of most recent command
+        oa.legacy.oa.last_command = text
