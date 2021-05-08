@@ -76,6 +76,9 @@ def _in(ctx):
             # Nothing to do
             continue
 
+        # Keep note of most recent command
+        oa.legacy.oa.last_command = text
+
         t = text.upper()
 
         # Check for a matching command
@@ -96,5 +99,4 @@ def _in(ctx):
             _logger.debug(f"'{text}' was not processed.")
         yield text
 
-        # Keep note of most recent command
-        oa.legacy.oa.last_command = text
+

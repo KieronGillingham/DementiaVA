@@ -47,7 +47,7 @@ def get_station():
     ]
     return random.choice(stations)
 
-@command(["close", "stop", "end", "no more"])
+@command(["close", "stop", "end", "no more", "turn off"])
 def stop():
     player = _get_player()
 
@@ -63,7 +63,7 @@ def stop():
     mind("dem")
 
 
-@command(["quieter", "quiet", "quite", "down"])
+@command(["quieter", "quiet", "quite", "down", "lower", "volume+down"])
 def volume_down():
     player = _get_player()
     new_volume = player.audio_get_volume() - 25
@@ -75,7 +75,7 @@ def volume_down():
         player.audio_set_volume(new_volume)
 
 
-@command(["louder", "up", "loud", "allowed"])
+@command(["louder", "up", "loud", "allowed", "volume+up"])
 def volume_up():
     player = _get_player()
     new_volume = player.audio_get_volume() + 25
@@ -91,9 +91,10 @@ def volume_up():
 def start():
     try:
         player = _get_player()
-        player.play()
         if player.audio_get_volume() <= 50:
             player.audio_set_volume(50)
+        player.play()
+        change_station()
         print('+ Playing Radio +')
     except Exception as ex:
         _logger.error(ex)

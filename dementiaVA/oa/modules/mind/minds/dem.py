@@ -90,7 +90,7 @@ def be_thanked():
     if time_since_last_reply < 10:
         say("You're welcome.")
     else:
-        _logger.debug("No reason to be thanked")
+        _logger.debug("Heard thank you, but no reason to be thanked")
 
 
 @command(["configure", "setting", "change+setting", "options"])
@@ -113,3 +113,7 @@ def talk_faster():
 def talk_slower():
     say("I'll talk slower from now on.")
     adjust_config("talkspeed", -25)
+
+@command(["reminder", "alarm"])
+def set_alarm():
+    mind("alarm")
